@@ -3,9 +3,7 @@
 package lesson2.task1
 
 import lesson1.task1.discriminant
-import kotlin.math.abs
-import kotlin.math.max
-import kotlin.math.sqrt
+import kotlin.math.*
 
 // Урок 2: ветвления (здесь), логический тип (см. 2.2).
 // Максимальное количество баллов = 6
@@ -164,7 +162,23 @@ fun rookOrBishopThreatens(
  * прямоугольным (вернуть 1) или тупоугольным (вернуть 2).
  * Если такой треугольник не существует, вернуть -1.
  */
-fun triangleKind(a: Double, b: Double, c: Double): Int = TODO()
+fun triangleKind(a: Double, b: Double, c: Double): Int {
+    // Вот хочется отсортировать a, b, c по возрастанию
+    // В питоне я бы это сделал так примерно
+    // a, b, c = sorted(a, b, c)
+    // А как в котлине?
+    val arr = doubleArrayOf(a, b, c)
+    arr.sort()
+    if (arr[0] + arr[1] <= arr[2]) {
+        return -1
+    }
+    val hypotenuse = (arr[0].pow(2) + arr[1].pow(2)).pow(0.5)
+    return when {
+        arr[2] < hypotenuse -> 0
+        arr[2] == hypotenuse -> 1
+        else -> 2
+    }
+}
 
 /**
  * Средняя (3 балла)
@@ -174,4 +188,11 @@ fun triangleKind(a: Double, b: Double, c: Double): Int = TODO()
  * Найти длину пересечения отрезков AB и CD.
  * Если пересечения нет, вернуть -1.
  */
-fun segmentLength(a: Int, b: Int, c: Int, d: Int): Int = TODO()
+fun segmentLength(a: Int, b: Int, c: Int, d: Int): Int {
+    val maxStart = max(a, c)
+    val minEnd = min(b, d)
+    return when {
+        maxStart > minEnd -> -1
+        else -> minEnd - maxStart
+    }
+}
