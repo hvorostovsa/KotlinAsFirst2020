@@ -154,7 +154,7 @@ fun rookOrBishopThreatens(
 fun triangleKind(a: Double, b: Double, c: Double): Int {
     val maxLen = maxOf(a, b, c)
     val minLen = minOf(a, b, c)
-    val midLen = a + b + c - maxOf(a, b, c) - minOf(a, b, c)
+    val midLen = a + b + c - maxLen - minLen
     val cos = (sqr(minLen) + sqr(midLen) - sqr(maxLen)) / (2 * minLen * midLen)
     return if (minLen + midLen < maxLen) -1 
     else if (cos == 0.0) 1 
@@ -172,8 +172,8 @@ fun triangleKind(a: Double, b: Double, c: Double): Int {
  * Если пересечения нет, вернуть -1.
  */
 fun segmentLength(a: Int, b: Int, c: Int, d: Int): Int =
-if (c in a..b && d in a..b) d - c 
-else if (a in c..d && b in c..d) b - a 
-else if (a in c..d && d in a..b) d - a 
-else if (c in a..b && b in c..d) b - c 
-else -1
+    if (c in a..b && d in a..b) d - c
+    else if (a in c..d && b in c..d) b - a
+    else if (a in c..d && d in a..b) d - a
+    else if (c in a..b && b in c..d) b - c
+    else -1
