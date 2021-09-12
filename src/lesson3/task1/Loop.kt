@@ -4,6 +4,7 @@ package lesson3.task1
 
 import lesson1.task1.sqr
 import lesson8.task2.kingMoveNumber
+import kotlin.math.PI
 import kotlin.math.pow
 import kotlin.math.sqrt
 
@@ -81,7 +82,7 @@ fun digitNumber(n: Int): Int {
     do {
         ++counter
         number /= 10
-    } while (number > 0)
+    } while (number != 0)
     return counter
 }
 
@@ -92,11 +93,14 @@ fun digitNumber(n: Int): Int {
  * Ряд Фибоначчи определён следующим образом: fib(1) = 1, fib(2) = 1, fib(n+2) = fib(n) + fib(n+1)
  */
 fun fib(n: Int): Int {
-    return when (n) {
-        1 -> 1
-        2 -> 1
-        else -> fib(n - 1) + fib(n - 2)
-    }
+//    return when (n) {
+//        1 -> 1
+//        2 -> 1
+//        else -> fib(n - 1) + fib(n - 2)
+//    }
+    val sqrt5 = sqrt(5.0)
+    val phi = (sqrt5 + 1) / 2
+    return (phi.pow(n) / sqrt5 + 0.5).toInt()
 }
 
 /**
@@ -244,8 +248,10 @@ fun hasDifferentDigits(n: Int): Boolean {
  * Использовать kotlin.math.sin и другие стандартные реализации функции синуса в этой задаче запрещается.
  */
 fun sin(x: Double, eps: Double): Double {
+    val oneCircle = 2 * Math.PI
     var n = x
-    n %= 2 * Math.PI
+    n %= oneCircle
+    if (n < 0) n += oneCircle
     var result = n
     var i = 1
     var elemNow: Double
@@ -271,8 +277,10 @@ fun sin(x: Double, eps: Double): Double {
  * Использовать kotlin.math.cos и другие стандартные реализации функции косинуса в этой задаче запрещается.
  */
 fun cos(x: Double, eps: Double): Double {
+    val oneCircle = 2 * Math.PI
     var n = x
-    n %= 2 * Math.PI
+    n %= oneCircle
+    if (n < 0) n += oneCircle
     var result = 1.0
     var i = 1
     var elemNow: Double
