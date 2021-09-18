@@ -5,6 +5,7 @@ package lesson4.task1
 import lesson1.task1.discriminant
 import lesson1.task1.sqr
 import lesson3.task1.isPrime
+import java.lang.Exception
 import java.util.*
 import kotlin.math.pow
 import kotlin.math.sqrt
@@ -125,7 +126,7 @@ fun buildSumExample(list: List<Int>) = list.joinToString(separator = " + ", post
  * Модуль пустого вектора считать равным 0.0.
  */
 fun abs(v: List<Double>): Double =
-    sqrt(v.fold(0.0) { prevResult, now -> prevResult + sqr(now) })
+    sqrt(v.sumOf { sqr(it) })
 
 /**
  * Простая (2 балла)
@@ -133,7 +134,7 @@ fun abs(v: List<Double>): Double =
  * Рассчитать среднее арифметическое элементов списка list. Вернуть 0.0, если список пуст
  */
 fun mean(list: List<Double>): Double =
-    if (list.isEmpty()) 0.0 else list.fold(0.0) { prev, now -> prev + now } / list.size
+    if (list.isEmpty()) 0.0 else list.sum() / list.size
 
 /**
  * Средняя (3 балла)
@@ -156,11 +157,8 @@ fun center(list: MutableList<Double>): MutableList<Double> {
  * представленные в виде списков a и b. Скалярное произведение считать по формуле:
  * C = a1b1 + a2b2 + ... + aNbN. Произведение пустых векторов считать равным 0.
  */
-fun times(a: List<Int>, b: List<Int>): Int {
-    var result = 0
-    for (i in a.indices) result += a[i] * b[i]
-    return result
-}
+fun times(a: List<Int>, b: List<Int>): Int =
+    a.zip(b).sumOf { it.first * it.second }
 
 /**
  * Средняя (3 балла)
@@ -170,11 +168,9 @@ fun times(a: List<Int>, b: List<Int>): Int {
  * Коэффициенты многочлена заданы списком p: (p0, p1, p2, p3, ..., pN).
  * Значение пустого многочлена равно 0 при любом x.
  */
-fun polynom(p: List<Int>, x: Int): Int {
-    var result = 0
-    for (i in p.indices) result += p[i] * x.toDouble().pow(i).toInt()
-    return result
-}
+fun polynom(p: List<Int>, x: Int): Int =
+    p.fold(0) { acc, i -> acc * x.toDouble().pow(i).toInt() }
+
 
 /**
  * Средняя (3 балла)
@@ -260,7 +256,7 @@ fun convertToString(n: Int, base: Int): String =
 
 fun getSymbolOfDigit(n: Int): String {
     if (n in 0..9) return n.toString()
-    return ('a'.code + n - 10).toChar().toString()
+    return ('a' + (n - 10)).toString()
 }
 
 /**
@@ -272,11 +268,13 @@ fun getSymbolOfDigit(n: Int): String {
  */
 fun decimal(digits: List<Int>, base: Int): Int {
     val baseDouble = base.toDouble()
-    var result = 0
-    for (i in digits.indices) {
-        result += digits[i] * baseDouble.pow(digits.size - i - 1).toInt()
-    }
-    return result
+    return digits.foldIndexed(0)
+    { i, total, item -> total + item * baseDouble.pow(digits.size - i - 1).toInt() }
+//    var result = 0
+//    for (i in digits.indices) {
+//        result += digits[i] * baseDouble.pow(digits.size - i - 1).toInt()
+//    }
+//    return result
 }
 
 /**
@@ -297,8 +295,8 @@ fun decimalFromString(str: String, base: Int): Int {
 }
 
 fun getDigitOfSymbol(symbol: Char): Int {
-    if (symbol in '0'..'9') return symbol.code - '0'.code
-    return symbol.code - 'a'.code + 10
+    if (symbol in '0'..'9') return symbol - '0'
+    return symbol - 'a' + 10
 }
 
 /**
