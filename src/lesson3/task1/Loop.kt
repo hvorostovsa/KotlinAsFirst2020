@@ -2,6 +2,7 @@
 
 package lesson3.task1
 
+import kotlin.math.pow
 import kotlin.math.sqrt
 
 // Урок 3: циклы
@@ -143,7 +144,16 @@ fun maxDivisor(n: Int): Int {
  * Написать функцию, которая находит, сколько шагов требуется для
  * этого для какого-либо начального X > 0.
  */
-fun collatzSteps(x: Int): Int = TODO()
+fun collatzSteps(x: Int): Int {
+    var k = 0
+    var a = x
+    while (a != 1) {
+        k++
+        if (a % 2 == 0) a /= 2
+        else a = 3 * a + 1
+    }
+    return k
+}
 
 /**
  * Средняя (3 балла)
@@ -151,7 +161,16 @@ fun collatzSteps(x: Int): Int = TODO()
  * Для заданных чисел m и n найти наименьшее общее кратное, то есть,
  * минимальное число k, которое делится и на m и на n без остатка
  */
-fun lcm(m: Int, n: Int): Int = TODO()
+fun lcm(m: Int, n: Int): Int {
+    var k = 0
+    for (i in maxOf(m, n)..m * n) {
+        if (i % m == 0 && i % n == 0) {
+            k = i
+            break
+        }
+    }
+    return k
+}
 
 /**
  * Средняя (3 балла)
@@ -160,7 +179,13 @@ fun lcm(m: Int, n: Int): Int = TODO()
  * Взаимно простые числа не имеют общих делителей, кроме 1.
  * Например, 25 и 49 взаимно простые, а 6 и 8 -- нет.
  */
-fun isCoPrime(m: Int, n: Int): Boolean = TODO()
+fun isCoPrime(m: Int, n: Int): Boolean {
+    val max = maxOf(m, n)
+    for (i in 2..max) {
+        if (max % i == 0 && (m + n - max) % i == 0) return false
+    }
+    return true
+}
 
 /**
  * Средняя (3 балла)
@@ -178,18 +203,48 @@ fun squareBetweenExists(m: Int, n: Int): Boolean = TODO()
  *
  * Использовать операции со строками в этой задаче запрещается.
  */
-fun revert(n: Int): Int = TODO()
+fun revert(n: Int): Int {
+    var sum = 0
+    var k = 0
+    var num = n
+    do {
+        num /= 10
+        k++
+    } while (num > 0)
+    num = n
+    do {
+        sum = (sum + (num % 10) * 10.0.pow(k - 1.toDouble())).toInt()
+        k -= 1
+        num /= 10
+    } while (num > 0)
+    return sum
+}
 
 /**
  * Средняя (3 балла)
- *
+ **
  * Проверить, является ли заданное число n палиндромом:
  * первая цифра равна последней, вторая -- предпоследней и так далее.
  * 15751 -- палиндром, 3653 -- нет.
  *
  * Использовать операции со строками в этой задаче запрещается.
  */
-fun isPalindrome(n: Int): Boolean = TODO()
+fun isPalindrome(n: Int): Boolean {
+    var sum = 0
+    var k = 0
+    var num = n
+    do {
+        num /= 10
+        k++
+    } while (num > 0)
+    num = n
+    do {
+        sum = (sum + (num % 10) * 10.0.pow(k - 1.toDouble())).toInt()
+        k -= 1
+        num /= 10
+    } while (num > 0)
+    return sum == n
+}
 
 /**
  * Средняя (3 балла)
