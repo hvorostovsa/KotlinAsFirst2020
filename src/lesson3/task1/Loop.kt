@@ -2,7 +2,7 @@
 
 package lesson3.task1
 
-import kotlin.math.pow
+
 import kotlin.math.sqrt
 
 // Урок 3: циклы
@@ -117,12 +117,10 @@ fun minDivisor(n: Int): Int {
  * Для заданного числа n > 1 найти максимальный делитель, меньший n
  */
 fun maxDivisor(n: Int): Int {
-    var div = 0
     var max = 0
     for (m in 1 until n) {
         if (n % m == 0) {
-            div = m
-            if (max < div) max = div
+            if (max < m) max = m
         }
     }
     return max
@@ -205,16 +203,9 @@ fun squareBetweenExists(m: Int, n: Int): Boolean = TODO()
  */
 fun revert(n: Int): Int {
     var sum = 0
-    var k = 0
     var num = n
     do {
-        num /= 10
-        k++
-    } while (num > 0)
-    num = n
-    do {
-        sum = (sum + (num % 10) * 10.0.pow(k - 1.toDouble())).toInt()
-        k -= 1
+        sum = sum * 10 + (num % 10)
         num /= 10
     } while (num > 0)
     return sum
@@ -231,16 +222,9 @@ fun revert(n: Int): Int {
  */
 fun isPalindrome(n: Int): Boolean {
     var sum = 0
-    var k = 0
     var num = n
     do {
-        num /= 10
-        k++
-    } while (num > 0)
-    num = n
-    do {
-        sum = (sum + (num % 10) * 10.0.pow(k - 1.toDouble())).toInt()
-        k -= 1
+        sum = sum * 10 + (num % 10)
         num /= 10
     } while (num > 0)
     return sum == n
@@ -254,7 +238,22 @@ fun isPalindrome(n: Int): Boolean {
  *
  * Использовать операции со строками в этой задаче запрещается.
  */
-fun hasDifferentDigits(n: Int): Boolean = TODO()
+fun hasDifferentDigits(n: Int): Boolean {
+    var num = n
+    var a = 0
+    var b = 0
+    val div = num % 10
+    do {
+        num /= 10
+        a++
+    } while (num > 0)
+    num = n
+    do {
+        if (div == num % 10) b++
+        num /= 10
+    } while (num > 0)
+    return a != b
+}
 
 /**
  * Средняя (4 балла)
@@ -287,7 +286,22 @@ fun cos(x: Double, eps: Double): Double = TODO()
  *
  * Использовать операции со строками в этой задаче запрещается.
  */
-fun squareSequenceDigit(n: Int): Int = TODO()
+fun squareSequenceDigit(n: Int): Int {
+    var num = 1
+    var sqr = num * num
+    var k = 0
+    while (n > k) {
+        sqr = num * num
+        while (sqr > 0) {
+            sqr /= 10
+            k++
+        }
+        sqr = num * num
+        num++
+    }
+    for (i in 1..k - n) sqr /= 10
+    return sqr % 10
+}
 
 /**
  * Сложная (5 баллов)
@@ -298,4 +312,19 @@ fun squareSequenceDigit(n: Int): Int = TODO()
  *
  * Использовать операции со строками в этой задаче запрещается.
  */
-fun fibSequenceDigit(n: Int): Int = TODO()
+fun fibSequenceDigit(n: Int): Int {
+    var num = 1
+    var answ = fib(num)
+    var k = 0
+    while (n > k) {
+        answ = fib(num)
+        while (answ > 0) {
+            answ /= 10
+            k++
+        }
+        answ = fib(num)
+        num++
+    }
+    for (i in 1..k - n) answ /= 10
+    return answ % 10
+}
