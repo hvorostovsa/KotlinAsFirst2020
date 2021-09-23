@@ -2,6 +2,7 @@
 
 package lesson5.task1
 
+import ru.spbstu.wheels.mapToArray
 import kotlin.math.min
 import kotlin.math.max
 import kotlin.math.pow
@@ -103,8 +104,9 @@ fun buildWordSet(text: List<String>): MutableSet<String> {
 fun buildGrades(grades: Map<String, Int>): Map<Int, List<String>> {
     val map = mutableMapOf<Int, List<String>>()
     for ((student, grade) in grades) {
-        if (grade !in map) map[grade] = listOf(student)
-        else map[grade] = map[grade]!! + student
+        map[grade] = map.getOrPut(grade) { listOf() } + student
+//        if (grade !in map) map[grade] = listOf(student)
+//        else map[grade] = map[grade]!! + student
     }
     return map.toMap()
 }
@@ -119,12 +121,8 @@ fun buildGrades(grades: Map<String, Int>): Map<Int, List<String>> {
  *   containsIn(mapOf("a" to "z"), mapOf("a" to "z", "b" to "sweet")) -> true
  *   containsIn(mapOf("a" to "z"), mapOf("a" to "zee", "b" to "sweet")) -> false
  */
-fun containsIn(a: Map<String, String>, b: Map<String, String>): Boolean {
-    for ((key, value) in a) {
-        if (!(key in b && b[key] == value)) return false
-    }
-    return true
-}
+fun containsIn(a: Map<String, String>, b: Map<String, String>): Boolean =
+    a.all { it.key in b && b[it.key] == it.value }
 
 /**
  * Простая (2 балла)
@@ -141,12 +139,9 @@ fun containsIn(a: Map<String, String>, b: Map<String, String>): Boolean {
  *     -> a changes to mutableMapOf() aka becomes empty
  */
 fun subtractOf(a: MutableMap<String, String>, b: Map<String, String>) {
-    val keysToDelete = mutableListOf<String>()
-    for ((keyB, valueB) in b) {
-        if (keyB in a && a[keyB] == valueB) keysToDelete.add(keyB)
+    for (keyB in b.keys) {
+        if (keyB in a && a[keyB] == b[keyB]) a.remove(keyB)
     }
-
-    for (keyToDelete in keysToDelete) a.remove(keyToDelete)
 }
 
 /**
@@ -157,7 +152,7 @@ fun subtractOf(a: MutableMap<String, String>, b: Map<String, String>) {
  * т. е. whoAreInBoth(listOf("Марат", "Семён, "Марат"), listOf("Марат", "Марат")) == listOf("Марат")
  */
 fun whoAreInBoth(a: List<String>, b: List<String>): List<String> =
-    a.filter { it in b }.toSet().toList()
+    a.toSet().intersect(b).toList()
 
 
 /**
@@ -203,22 +198,8 @@ fun mergePhoneBooks(mapA: Map<String, String>, mapB: Map<String, String>): Map<S
  */
 fun averageStockPrice(stockPrices: List<Pair<String, Double>>): Map<String, Double> {
     // stockName -> [totalPrice, count]
-    val dataMap = mutableMapOf<String, MutableList<Double>>()
-    val resultMap = mutableMapOf<String, Double>()
-
-    for ((stock, price) in stockPrices) {
-        if (stock in dataMap) {
-            dataMap[stock]!![0] = dataMap[stock]!![0] + price
-            dataMap[stock]!![1] = dataMap[stock]!![1] + 1.0
-        } else {
-            dataMap[stock] = mutableListOf(price, 1.0)
-        }
-    }
-
-    for ((key, values) in dataMap) {
-        resultMap[key] = values[0] / values[1]
-    }
-    return resultMap
+    val dataMap = stockPrices.groupBy { it.first }
+    return dataMap.map { Pair(it.key, it.value.sumOf { pair -> pair.second } / it.value.size) }.toMap()
 }
 
 /**
@@ -236,18 +217,14 @@ fun averageStockPrice(stockPrices: List<Pair<String, Double>>): Map<String, Doub
  *     "печенье"
  *   ) -> "Мария"
  */
-fun findCheapestStuff(stuff: Map<String, Pair<String, Double>>, kind: String): String? {
-    var nameToFind: String? = null
-    var cheapestPrice: Double? = null
 
-    for ((key, value) in stuff) {
-        if (value.first == kind && (cheapestPrice == null || cheapestPrice > value.second)) {
-            nameToFind = key
-            cheapestPrice = value.second
-        }
-    }
-    return nameToFind
-}
+// Сделал "в одну строчку" с помощью функции высшего порядка, но сложность кода значительно возросла
+fun findCheapestStuff(stuff: Map<String, Pair<String, Double>>, kind: String): String? =
+    stuff.toList().fold(Pair<String?, Double?>(null, null)) { minPair, (name, pair) ->
+        if (pair.first == kind && (minPair.second == null || minPair.second!! > pair.second)) Pair(name, pair.second)
+        else minPair
+    }.first
+
 
 /**
  * Средняя (3 балла)
@@ -279,15 +256,8 @@ fun canBuildFrom(chars: List<Char>, word: String): Boolean {
  * Например:
  *   extractRepeats(listOf("a", "b", "a")) -> mapOf("a" to 2)
  */
-fun extractRepeats(list: List<String>): Map<String, Int> {
-    val map = mutableMapOf<String, Int>()
-
-    for (elem in list) {
-        map[elem] = map.getOrDefault(elem, 0) + 1
-    }
-    return map.filterValues { it >= 2 }
-}
-
+fun extractRepeats(list: List<String>): Map<String, Int> =
+    list.groupBy { it }.map { Pair(it.key, it.value.size) }.filter { it.second > 1 }.toMap()
 /**
  * Средняя (3 балла)
  *
@@ -426,15 +396,18 @@ fun findSumOfTwo(list: List<Int>, number: Int): Pair<Int, Int> {
  *   ) -> emptySet()
  */
 fun bagPacking(treasures: Map<String, Pair<Int, Int>>, capacity: Int): Set<String> {
-    TODO() // task isn't finished
-
-//    var capacityLeft = capacity
-//    val keys = treasures.map { Pair(it.key, it.value.second / it.value.first.toDouble().pow(2)) }
-//        .sortedBy { it.second }
+    TODO()
+//    // Все веса по возрастанию
+//    val weights = treasures.map { it.value.first }.sortedBy { it }
+//    val weightsUnique = weights.toSet().toList()
 //
-//    for (key in keys) {
-//        if (capacityLeft >= treasures[key.first]!!) {
-//
+//    fun getData(weight: Int): Int { // get the row with the highest weight that <= than given value
+//        var lastValue = 0
+//        for (w in weightsUnique) {
+//            if (w > weight) return lastValue
+//            lastValue
 //        }
 //    }
+//
+//    val bestPrices = mutableListOf<Pair<Int, Set<String>>>()
 }

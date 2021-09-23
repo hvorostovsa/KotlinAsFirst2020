@@ -169,7 +169,7 @@ fun times(a: List<Int>, b: List<Int>): Int =
  * Значение пустого многочлена равно 0 при любом x.
  */
 fun polynom(p: List<Int>, x: Int): Int =
-    p.fold(0) { acc, i -> acc * x.toDouble().pow(i).toInt() }
+    p.foldIndexed(0) { index, total, elem -> total + elem * x.toDouble().pow(index).toInt() }
 
 
 /**
