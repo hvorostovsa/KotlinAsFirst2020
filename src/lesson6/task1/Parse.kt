@@ -361,7 +361,7 @@ fun fromRoman(roman: String): Int {
     )
     if (roman.any { it !in digits.keys }) return -1
     val list = roman.map { digits[it]!! }
-    if (list.isEmpty()) return 0
+    if (list.isEmpty()) return -1
     var result = list[list.size - 1]
     for (i in list.size - 2 downTo 0) {
         if (list[i + 1] > list[i]) result -= list[i]
