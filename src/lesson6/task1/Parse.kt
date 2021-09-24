@@ -151,7 +151,7 @@ fun dateDigitToStr(digital: String): String {
         "июля", "августа", "сентября", "октября", "ноября", "декабря",
     )[months - 1]
 
-    return "%d %s %d".format(days, monthsName, days)
+    return "%d %s %d".format(days, monthsName, years)
 }
 
 /**
@@ -251,7 +251,7 @@ fun bestHighJump(jumps: String): Int {
             return -1
         }
         if (resultNow <= maxResult) continue // skip not the best result
-        val attempts = jumps.toSet()
+        val attempts = jumpResults[i + 1].toSet()
         if (attempts.any { it !in good }) return -1 // stop if founded an incorrect char
         if ('+' in attempts) maxResult = max(resultNow, maxResult)
     }
