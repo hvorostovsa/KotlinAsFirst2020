@@ -90,12 +90,18 @@ fun digitNumber(n: Int): Int {
  * Ряд Фибоначчи определён следующим образом: fib(1) = 1, fib(2) = 1, fib(n+2) = fib(n) + fib(n+1)
  */
 fun fib(n: Int): Int {
-    var num = 1
-    for (i in 1 until n) {
-        num += num
+    var num1: Int
+    var num2 = 0
+    var sum = 1
+    if (n in 1..2) return 1
+    else for (i in 1 until n) {
+        num1 = num2
+        num2 = sum
+        sum = num1 + num2
     }
-    return num
+    return sum
 }
+
 /**
  * Простая (2 балла)
  *
@@ -162,12 +168,13 @@ fun collatzSteps(x: Int): Int {
  */
 fun lcm(m: Int, n: Int): Int {
     var k = 0
-    for (i in maxOf(m, n)..m * n) {
+    for (i in maxOf(m, n)..m * n / 2) {
         if (i % m == 0 && i % n == 0) {
             k = i
             break
         }
     }
+    if (k == 0) k = m * n
     return k
 }
 
