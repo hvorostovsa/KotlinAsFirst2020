@@ -4,6 +4,7 @@ package lesson3.task1
 
 
 import kotlin.math.sqrt
+import kotlin.math.pow
 
 // Урок 3: циклы
 // Максимальное количество баллов = 9
@@ -108,14 +109,10 @@ fun fib(n: Int): Int {
  * Для заданного числа n > 1 найти минимальный делитель, превышающий 1
  */
 fun minDivisor(n: Int): Int {
-    var div = 0
-    for (m in 2..n) {
-        if (n % m == 0) {
-            div = m
-            break
-        }
+    for (m in 2..n / 2) {
+        if (n % m == 0) return m
     }
-    return div
+    return n
 }
 
 /**
@@ -124,13 +121,10 @@ fun minDivisor(n: Int): Int {
  * Для заданного числа n > 1 найти максимальный делитель, меньший n
  */
 fun maxDivisor(n: Int): Int {
-    var max = 0
-    for (m in 1 until n) {
-        if (n % m == 0) {
-            if (max < m) max = m
-        }
+    for (m in n - 1 downTo 2) {
+        if (n % m == 0) return m
     }
-    return max
+    return 1
 }
 
 /**
@@ -167,15 +161,12 @@ fun collatzSteps(x: Int): Int {
  * минимальное число k, которое делится и на m и на n без остатка
  */
 fun lcm(m: Int, n: Int): Int {
-    var k = 0
     for (i in maxOf(m, n)..m * n / 2) {
         if (i % m == 0 && i % n == 0) {
-            k = i
-            break
+            return i
         }
     }
-    if (k == 0) k = m * n
-    return k
+    return m * n
 }
 
 /**
@@ -187,8 +178,9 @@ fun lcm(m: Int, n: Int): Int {
  */
 fun isCoPrime(m: Int, n: Int): Boolean {
     val max = maxOf(m, n)
+    val min = m + n - max
     for (i in 2..max) {
-        if (max % i == 0 && (m + n - max) % i == 0) return false
+        if (max % i == 0 && min % i == 0) return false
     }
     return true
 }
@@ -228,15 +220,8 @@ fun revert(n: Int): Int {
  *
  * Использовать операции со строками в этой задаче запрещается.
  */
-fun isPalindrome(n: Int): Boolean {
-    var sum = 0
-    var num = n
-    do {
-        sum = sum * 10 + (num % 10)
-        num /= 10
-    } while (num > 0)
-    return sum == n
-}
+fun isPalindrome(n: Int): Boolean =
+    n == revert(n)
 
 /**
  * Средняя (3 балла)
@@ -248,20 +233,14 @@ fun isPalindrome(n: Int): Boolean {
  */
 fun hasDifferentDigits(n: Int): Boolean {
     var num = n
-    var a = 0
-    var b = 0
     val div = num % 10
     do {
+        if (div != num % 10) return true
         num /= 10
-        a++
-    } while (num > 0)
-    num = n
-    do {
-        if (div == num % 10) b++
-        num /= 10
-    } while (num > 0)
-    return a != b
+    } while (num != 0)
+    return false
 }
+
 
 /**
  * Средняя (4 балла)
@@ -300,15 +279,10 @@ fun squareSequenceDigit(n: Int): Int {
     var k = 0
     while (n > k) {
         sqr = num * num
-        while (sqr > 0) {
-            sqr /= 10
-            k++
-        }
-        sqr = num * num
+        k += digitNumber(sqr)
         num++
     }
-    for (i in 1..k - n) sqr /= 10
-    return sqr % 10
+    return (sqr / 10.0.pow(k - n.toDouble())).toInt() % 10
 }
 
 /**
@@ -326,13 +300,8 @@ fun fibSequenceDigit(n: Int): Int {
     var k = 0
     while (n > k) {
         answ = fib(num)
-        while (answ > 0) {
-            answ /= 10
-            k++
-        }
-        answ = fib(num)
+        k += digitNumber(answ)
         num++
     }
-    for (i in 1..k - n) answ /= 10
-    return answ % 10
+    return (answ / 10.0.pow(k - n.toDouble())).toInt() % 10
 }
