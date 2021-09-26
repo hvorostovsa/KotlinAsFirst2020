@@ -5,7 +5,6 @@ package lesson3.task1
 
 import kotlin.math.sqrt
 import kotlin.math.pow
-import kotlin.math.roundToInt
 
 // Урок 3: циклы
 // Максимальное количество баллов = 9
@@ -178,8 +177,8 @@ fun lcm(m: Int, n: Int): Int {
  * Например, 25 и 49 взаимно простые, а 6 и 8 -- нет.
  */
 fun isCoPrime(m: Int, n: Int): Boolean {
-    var max = maxOf(m, n)
-    var min = m + n - max
+    val max = maxOf(m, n)
+    val min = m + n - max
     for (i in 2..min) {
         if (m % i == 0 && n % i == 0) return false
     }
