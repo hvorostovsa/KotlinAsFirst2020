@@ -221,13 +221,15 @@ fun accumulate(list: MutableList<Int>): MutableList<Int> {
 fun factorize(n: Int): List<Int> {
     val result = mutableListOf<Int>()
     var a = n
-    for (i in 2..n / 2) {
-        if (a % i == 0) {
-            result.add(i)
-            a /= i
+    while (a > 1) {
+        for (i in 2..n) {
+            if (a % i == 0) {
+                result.add(i)
+                a /= i
+                break
+            }
         }
     }
-    result.add(a)
     return result.sorted()
 }
 
@@ -238,8 +240,8 @@ fun factorize(n: Int): List<Int> {
  * Результат разложения вернуть в виде строки, например 75 -> 3*5*5
  * Множители в результирующей строке должны располагаться по возрастанию.
  */
-fun factorizeToString(n: Int): String = TODO()
-
+fun factorizeToString(n: Int): String =
+    factorize(n).joinToString(separator = "*")
 /**
  * Средняя (3 балла)
  *
