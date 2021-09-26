@@ -5,6 +5,7 @@ package lesson3.task1
 
 import kotlin.math.sqrt
 import kotlin.math.pow
+import kotlin.math.roundToInt
 
 // Урок 3: циклы
 // Максимальное количество баллов = 9
@@ -109,7 +110,7 @@ fun fib(n: Int): Int {
  * Для заданного числа n > 1 найти минимальный делитель, превышающий 1
  */
 fun minDivisor(n: Int): Int {
-    for (m in 2..n / 2) {
+    for (m in 2..sqrt(n.toDouble()).toInt()) {
         if (n % m == 0) return m
     }
     return n
@@ -177,10 +178,10 @@ fun lcm(m: Int, n: Int): Int {
  * Например, 25 и 49 взаимно простые, а 6 и 8 -- нет.
  */
 fun isCoPrime(m: Int, n: Int): Boolean {
-    val max = maxOf(m, n)
-    val min = m + n - max
-    for (i in 2..max) {
-        if (max % i == 0 && min % i == 0) return false
+    var max = maxOf(m, n)
+    var min = m + n - max
+    for (i in 2..min) {
+        if (m % i == 0 && n % i == 0) return false
     }
     return true
 }
