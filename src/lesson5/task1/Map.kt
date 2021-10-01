@@ -2,6 +2,7 @@
 
 package lesson5.task1
 
+import lesson4.task1.mean
 import ru.spbstu.wheels.mapToArray
 import kotlin.math.min
 import kotlin.math.max
@@ -102,9 +103,9 @@ fun buildWordSet(text: List<String>): MutableSet<String> {
  *     -> mapOf(5 to listOf("Семён", "Михаил"), 3 to listOf("Марат"))
  */
 fun buildGrades(grades: Map<String, Int>): Map<Int, List<String>> {
-    val map = mutableMapOf<Int, List<String>>()
+    val map = mutableMapOf<Int, MutableList<String>>()
     for ((student, grade) in grades) {
-        map[grade] = map.getOrPut(grade) { listOf() } + student
+        map.getOrPut(grade) { mutableListOf() }.add(student)
 //        if (grade !in map) map[grade] = listOf(student)
 //        else map[grade] = map[grade]!! + student
     }
@@ -196,11 +197,9 @@ fun mergePhoneBooks(mapA: Map<String, String>, mapB: Map<String, String>): Map<S
  *   averageStockPrice(listOf("MSFT" to 100.0, "MSFT" to 200.0, "NFLX" to 40.0))
  *     -> mapOf("MSFT" to 150.0, "NFLX" to 40.0)
  */
-fun averageStockPrice(stockPrices: List<Pair<String, Double>>): Map<String, Double> {
-    // stockName -> [totalPrice, count]
-    val dataMap = stockPrices.groupBy { it.first }
-    return dataMap.map { Pair(it.key, it.value.sumOf { pair -> pair.second } / it.value.size) }.toMap()
-}
+fun averageStockPrice(stockPrices: List<Pair<String, Double>>): Map<String, Double> =
+    stockPrices.groupBy({ it.first }, { it.second }).mapValues { mean(it.value) }
+
 
 /**
  * Средняя (4 балла)
@@ -218,12 +217,9 @@ fun averageStockPrice(stockPrices: List<Pair<String, Double>>): Map<String, Doub
  *   ) -> "Мария"
  */
 
-// Сделал "в одну строчку" с помощью функции высшего порядка, но сложность кода значительно возросла
 fun findCheapestStuff(stuff: Map<String, Pair<String, Double>>, kind: String): String? =
-    stuff.toList().fold(Pair<String?, Double?>(null, null)) { minPair, (name, pair) ->
-        if (pair.first == kind && (minPair.second == null || minPair.second!! > pair.second)) Pair(name, pair.second)
-        else minPair
-    }.first
+    stuff.filter { it.value.first == kind }.minByOrNull { it.value.second }?.key
+
 
 
 /**
@@ -361,14 +357,15 @@ fun getSetOfFriends(
  *   findSumOfTwo(listOf(1, 2, 3), 6) -> Pair(-1, -1)
  */
 fun findSumOfTwo(list: List<Int>, number: Int): Pair<Int, Int> {
-    val set = list.filter { it <= number }.toSet()
-    for (n in set) {
-        if (number - n == n && list.count { it == n } < 2) continue
-        if (number - n in set) {
-            val index1 = list.indexOf(n)
-            val index2 = list.indexOf(number - n)
-            if (index1 < index2) return Pair(index1, index2)
-            return Pair(index2, index1)
+    val numbers = list.groupBy { it }.mapValues { it.value.size }
+    for (n in list) {
+        if (number - n in numbers) {
+            if (number - n == n) {
+                if (numbers[n]!! < 2) continue
+                return Pair(list.indexOf(n), list.lastIndexOf(n))
+            }
+            val indexes = listOf(list.indexOf(n), list.indexOf(number - n)).sorted()
+            return Pair(indexes[0], indexes[1])
         }
     }
     return Pair(-1, -1)
@@ -398,16 +395,9 @@ fun findSumOfTwo(list: List<Int>, number: Int): Pair<Int, Int> {
 fun bagPacking(treasures: Map<String, Pair<Int, Int>>, capacity: Int): Set<String> {
     TODO()
 //    // Все веса по возрастанию
-//    val weights = treasures.map { it.value.first }.sortedBy { it }
-//    val weightsUnique = weights.toSet().toList()
+//    val weights = treasures.map { it.value.first }.sorted()
+//    val weightsUnique = weights.toSet().toList().sorted()
 //
-//    fun getData(weight: Int): Int { // get the row with the highest weight that <= than given value
-//        var lastValue = 0
-//        for (w in weightsUnique) {
-//            if (w > weight) return lastValue
-//            lastValue
-//        }
-//    }
-//
-//    val bestPrices = mutableListOf<Pair<Int, Set<String>>>()
+//    val bestPrices = List(capacity + 1) { 0 }
+//    for ()
 }

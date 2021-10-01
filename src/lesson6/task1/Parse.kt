@@ -5,6 +5,7 @@ package lesson6.task1
 import lesson2.task2.daysInMonth
 import lesson4.task1.roman
 import ru.spbstu.wheels.tryEx
+import java.lang.Exception
 import java.lang.IllegalArgumentException
 import java.time.Year
 import kotlin.math.max
@@ -187,19 +188,19 @@ fun flattenPhoneNumber(phone: String): String {
     // if brackets exist but there aren't any digits between them. Or if it's an incorrect brackets order - ")("
     if (openBracket != -1 && closeBracket - openBracket < 2) return ""
 
-    var result = ""
+    val result = StringBuilder()
     if (flattenPhone.startsWith("+")) {
-        result = "+"
+        result.append("+")
         flattenPhone = flattenPhone.substring(1)
     }
     val goodSet = setOf('-', '(', ')')
     for (char in flattenPhone) {
         if (char in goodSet) continue
         if (!char.isDigit()) return "" // not allowed char, so phone is incorrect
-        result += char
+        result.append(char)
     }
 
-    return result
+    return result.toString()
 }
 
 /**
@@ -441,7 +442,7 @@ fun computeDeviceCells(cells: Int, commands: String, limit: Int): List<Int> {
                 else if (--counter == 0) return i
             }
         }
-        return -1 // never reached for correct brackets sequence
+        return -1 // will never be reached for correct brackets sequence
     }
 
     fun executeCommandLine(commandsLine: String) {
@@ -460,10 +461,9 @@ fun computeDeviceCells(cells: Int, commands: String, limit: Int): List<Int> {
                     else {
                         val start = commandIndex + 1
                         val end = findNextClosingBracketIndex(commandIndex)
+                        val commandLineNow = commandsLine.substring(start, end)
                         do {
-                            executeCommandLine(
-                                commandsLine.substring(start, end)
-                            )
+                            executeCommandLine(commandLineNow)
                         } while (cellsList[index] != 0)
                         commandIndex--
                     }
