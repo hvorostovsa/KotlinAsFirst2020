@@ -2,6 +2,7 @@
 
 package lesson7.task1
 
+import ru.spbstu.wheels.toMutableMap
 import java.io.File
 
 // Урок 7: работа с файлами
@@ -63,7 +64,11 @@ fun alignFile(inputName: String, lineLength: Int, outputName: String) {
  * Подчёркивание в середине и/или в конце строк значения не имеет.
  */
 fun deleteMarked(inputName: String, outputName: String) {
-    TODO()
+    File(outputName).bufferedWriter().use { writer ->
+        File(inputName).forEachLine { line ->
+            if (!line.startsWith("_")) writer.write("$line\n")
+        }
+    }
 }
 
 /**
@@ -75,7 +80,26 @@ fun deleteMarked(inputName: String, outputName: String) {
  * Регистр букв игнорировать, то есть буквы е и Е считать одинаковыми.
  *
  */
-fun countSubstrings(inputName: String, substrings: List<String>): Map<String, Int> = TODO()
+fun countSubstrings(inputName: String, substrings: List<String>): Map<String, Int> {
+    val map = substrings.map { it to 0 }.toMutableMap()
+    val substringsLowercase = substrings.map { it.lowercase() }
+    File(inputName).forEachLine { line ->
+        val lineLowercase = line.lowercase()
+        for ((i, substring) in substringsLowercase.withIndex()) {
+            map[substrings[i]] = map[substrings[i]]!! + substringsCount(lineLowercase, substring)
+        }
+    }
+    return map
+}
+
+fun substringsCount(string: String, substring: String): Int {
+    // С пересечениями
+    var result = 0
+    for (i in 0..string.length - substring.length) {
+        if (string.substring(i, i + substring.length) == substring) result++
+    }
+    return result
+}
 
 
 /**
@@ -92,7 +116,24 @@ fun countSubstrings(inputName: String, substrings: List<String>): Map<String, In
  *
  */
 fun sibilants(inputName: String, outputName: String) {
-    TODO()
+    val goodLetters = setOf('ж', 'ч', 'ш', 'щ')
+    val toFix = mapOf('ы' to 'и', 'я' to 'а', 'ю' to 'у',)
+
+    File(outputName).bufferedWriter().use { writer ->
+        File(inputName).forEachLine { line ->
+            var resultLine = line[0].toString()
+            for (i in 1 until line.length) {
+                val c = line[i]
+                val cLower = c.lowercaseChar()
+                if (line[i - 1].lowercaseChar() in goodLetters && cLower in toFix) {
+                    resultLine += if (c.isLowerCase()) toFix[cLower]!! else toFix[cLower]!!.uppercaseChar()
+                } else {
+                    resultLine += c
+                }
+            }
+            writer.write("$resultLine\n")
+        }
+    }
 }
 
 /**
@@ -113,7 +154,14 @@ fun sibilants(inputName: String, outputName: String) {
  *
  */
 fun centerFile(inputName: String, outputName: String) {
-    TODO()
+    val lines = File(inputName).readLines().map { it.trim() }
+    val length = lines.maxOf { it.length }
+    File(outputName).bufferedWriter().use { writer ->
+        lines.forEach { line ->
+            val leftIndent = (length - line.length) / 2
+            writer.write(" ".repeat(leftIndent) + line + "\n")
+        }
+    }
 }
 
 /**
@@ -144,7 +192,28 @@ fun centerFile(inputName: String, outputName: String) {
  * 8) Если входной файл удовлетворяет требованиям 1-7, то он должен быть в точности идентичен выходному файлу
  */
 fun alignFileByWidth(inputName: String, outputName: String) {
-    TODO()
+    val lines = File(inputName).readLines().map { it.trim().split(Regex("\\s+")) }
+    val length = lines.maxOf { it.joinToString(" ").length }
+    File(outputName).bufferedWriter().use { writer ->
+        lines.forEach { line ->
+            if (line.isEmpty()) writer.newLine()
+            else if (line.size == 1) writer.write("${line[0]}\n")
+            else {
+                val lengthNow = line.sumOf { it.length }
+                val spaceNumber = (length - lengthNow) / (line.size - 1)
+                val remainder = (length - lengthNow) % (line.size - 1)
+                var resultLine = ""
+                for (i in 0 until remainder) {
+                    resultLine += line[i] + " ".repeat(spaceNumber + 1)
+                }
+                for (i in remainder until line.size - 1) {
+                    resultLine += line[i] + " ".repeat(spaceNumber)
+                }
+                resultLine += line[line.size - 1]
+                writer.write("$resultLine\n")
+            }
+        }
+    }
 }
 
 /**
@@ -167,7 +236,22 @@ fun alignFileByWidth(inputName: String, outputName: String) {
  * Ключи в ассоциативном массиве должны быть в нижнем регистре.
  *
  */
-fun top20Words(inputName: String): Map<String, Int> = TODO()
+// Я знаю, что не работает. Не понимаю - в чём ошибка
+fun top20Words(inputName: String): Map<String, Int> {
+    val map = mutableMapOf<String, Int>()
+
+    File(inputName).forEachLine { line ->
+        val newLine = line.trim().lowercase().replace(Regex("""[^\sa-zа-яё]"""), "")
+        println(newLine)
+        for (word in newLine.split(Regex("\\s+"))) {
+            if (word.isNotBlank()) map[word] = map.getOrDefault(word, 0) + 1
+        }
+    }
+
+    if (map.size <= 20) return map
+    val lowestTop20 = map.values.toList().sortedByDescending { it }[19]
+    return map.filter { it.value >= lowestTop20 }
+}
 
 /**
  * Средняя (14 баллов)
@@ -205,7 +289,20 @@ fun top20Words(inputName: String): Map<String, Int> = TODO()
  * Обратите внимание: данная функция не имеет возвращаемого значения
  */
 fun transliterate(inputName: String, dictionary: Map<Char, String>, outputName: String) {
-    TODO()
+    val newDictionary = dictionary.map { it.key.lowercaseChar() to it.value.lowercase() }.toMap()
+    File(outputName).bufferedWriter().use { writer ->
+        File(inputName).forEachLine { line ->
+            var resultLine = ""
+            line.forEach { char ->
+                val lowerChar = char.lowercaseChar()
+                if (lowerChar in newDictionary) {
+                    if (char.isLowerCase()) resultLine += newDictionary[lowerChar]
+                    else resultLine += newDictionary[lowerChar]!!.replaceFirstChar { it.uppercaseChar() }
+                } else resultLine += char
+            }
+            writer.write("$resultLine\n")
+        }
+    }
 }
 
 /**
@@ -233,7 +330,23 @@ fun transliterate(inputName: String, dictionary: Map<Char, String>, outputName: 
  * Обратите внимание: данная функция не имеет возвращаемого значения
  */
 fun chooseLongestChaoticWord(inputName: String, outputName: String) {
-    TODO()
+    var length = 0
+    val list = mutableListOf<String>()
+
+    File(inputName).forEachLine { line ->
+        val word = line.trim()
+        if (word.length >= length && word.lowercase().toSet().size == word.length) {
+            if (word.length > length) {
+                length = word.length
+                list.clear()
+            }
+            list.add(word)
+        }
+    }
+
+    File(outputName).bufferedWriter().use { writer ->
+        writer.write(list.joinToString(", "))
+    }
 }
 
 /**
@@ -282,7 +395,71 @@ Suspendisse ~~et elit in enim tempus iaculis~~.
  * (Отступы и переносы строк в примере добавлены для наглядности, при решении задачи их реализовывать не обязательно)
  */
 fun markdownToHtmlSimple(inputName: String, outputName: String) {
-    TODO()
+    File(outputName).bufferedWriter().use { writer ->
+        writer.write("<html><body>")
+        File(inputName).readText().trim().split(Regex("\r?\n\r?\n")).forEach { paragraph ->
+            writer.write("<p>${markdownParagraph(paragraph)}</p>")
+        }
+        writer.write("</body></html>")
+    }
+}
+
+fun markdownParagraph(paragraph: String): String {
+    val result = StringBuilder()
+    var stack = 0
+    var strikethroughOpened = false
+    var cursiveLast = false
+    var i = 0
+
+    while (i < paragraph.length) {
+        val c = paragraph[i]
+
+        if (c == '*') { // stars checking
+            if (paragraph.getOrNull(i + 1) == '*') {
+                if (paragraph.getOrNull(i + 2) == '*') { // 3 stars
+                    if (stack > 0) {
+                        result.append(if (cursiveLast) "</i></b>" else "</b></i>")
+                        stack = 0
+                    } else {
+                        result.append("<b><i>")
+                        stack = 3
+                        cursiveLast = true
+                    }
+                    i += 2
+                } else { // 2 stars
+                    if (stack >= 2) {
+                        result.append("</b>")
+                        stack -= 2
+                        cursiveLast = true
+                    } else {
+                        result.append("<b>")
+                        stack += 2
+                        cursiveLast = false
+                    }
+                    i += 1
+                }
+            } else { // 1 star
+                if (stack >= 1) {
+                    result.append("</i>")
+                    stack -= 1
+                    cursiveLast = false
+                } else {
+                    result.append("<i>")
+                    stack += 1
+                    cursiveLast = true
+                }
+            }
+        } else if (c == '~' && paragraph.getOrNull(i + 1) == '~') { // strikethrough checking
+            if (strikethroughOpened) result.append("</s>")
+            else result.append("<s>")
+            strikethroughOpened = !strikethroughOpened
+            i += 1
+        } else { // common char
+            result.append(c)
+        }
+        i++ // next iteration index
+    }
+    return result.toString()
 }
 
 /**
@@ -383,7 +560,58 @@ fun markdownToHtmlSimple(inputName: String, outputName: String) {
  * (Отступы и переносы строк в примере добавлены для наглядности, при решении задачи их реализовывать не обязательно)
  */
 fun markdownToHtmlLists(inputName: String, outputName: String) {
-    TODO()
+    File(outputName).bufferedWriter().use { writer ->
+        writer.write("<html><body>")
+        File(inputName).readText().trim().split(Regex("\r?\n\r?\n")).forEach { paragraph ->
+            writer.write("<p>${listParagraph(paragraph)}</p>")
+        }
+        writer.write("</body></html>")
+    }
+}
+
+fun listParagraph(paragraph: String): String {
+    val data = paragraph.trimIndent()
+    val isNumbered = data[0] != '*'
+
+    val listTag = if (isNumbered) "ol" else "ul"
+    val listCheckRegex = if (isNumbered) Regex("^\\d+\\. ") else Regex("^\\* ")
+
+    val result = StringBuilder()
+    result.append("<$listTag>")
+
+    val rows = data.split(Regex("\r?\n"))
+    var i = 0
+    var needCloseTag = false
+    while (i < rows.size) {
+        val row = rows[i]
+        if (row.startsWith(" ".repeat(4))) {
+            val indents = row.indexOfFirst { it != ' ' }
+            val newParagraphList = mutableListOf(row)
+            var j = i + 1
+            while (j < rows.size) {
+                if (rows[j].indexOfFirst { it != ' ' } >= indents) {
+                    newParagraphList.add(rows[j])
+                } else break
+                j++
+            }
+            i = j - 1
+            result.append(listParagraph(newParagraphList.joinToString("\n")))
+        } else {
+            val match = listCheckRegex.find(row)
+            if (match != null) {
+                if (needCloseTag) result.append("</li>")
+                result.append("<li>${row.substring(match.range.last + 1)}")
+                needCloseTag = true
+            } else {
+                result.append(row)
+            }
+        }
+        i++
+    }
+    if (needCloseTag) result.append("</li>")
+    result.append("</$listTag>")
+
+    return result.toString()
 }
 
 /**
@@ -395,7 +623,15 @@ fun markdownToHtmlLists(inputName: String, outputName: String) {
  *
  */
 fun markdownToHtml(inputName: String, outputName: String) {
-    TODO()
+    File(outputName).bufferedWriter().use { writer ->
+        writer.write("<html><body>")
+        File(inputName).readText().trim().split(Regex("\r?\n\r?\n")).forEach { paragraph ->
+            if (paragraph.contains(Regex("^ *\\* |^ *\\d+. "))) {
+                writer.write("<p>${markdownParagraph(listParagraph(paragraph))}</p>")
+            } else writer.write("<p>${markdownParagraph(paragraph)}</p>")
+        }
+        writer.write("</body></html>")
+    }
 }
 
 /**
