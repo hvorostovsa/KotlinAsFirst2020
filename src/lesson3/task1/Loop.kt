@@ -5,6 +5,7 @@ package lesson3.task1
 
 import kotlin.math.sqrt
 import kotlin.math.pow
+import kotlin.math.roundToInt
 
 // Урок 3: циклы
 // Максимальное количество баллов = 9
@@ -121,7 +122,7 @@ fun minDivisor(n: Int): Int {
  * Для заданного числа n > 1 найти максимальный делитель, меньший n
  */
 fun maxDivisor(n: Int): Int {
-    for (m in n / 2 downTo 2) {
+    for (m in n / 2 downTo sqrt(n.toDouble()).toInt()) {
         if (n % m == 0) return m
     }
     return 1
@@ -161,7 +162,7 @@ fun collatzSteps(x: Int): Int {
  * минимальное число k, которое делится и на m и на n без остатка
  */
 fun lcm(m: Int, n: Int): Int {
-    for (i in maxOf(m, n)..m * n / 2) {
+    for (i in maxOf(m, n)..(m * n) / 2 step maxOf(m, n)) {
         if (i % m == 0 && i % n == 0) {
             return i
         }

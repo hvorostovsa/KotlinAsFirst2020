@@ -3,7 +3,6 @@
 package lesson4.task1
 
 import lesson1.task1.discriminant
-import kotlin.math.pow
 import kotlin.math.sqrt
 
 // Урок 4: списки
@@ -184,10 +183,10 @@ fun times(a: List<Int>, b: List<Int>): Int {
  */
 fun polynom(p: List<Int>, x: Int): Int {
     var sum = 0
-    var exp: Int
+    var exp = 1
     for (i in 0 until p.size) {
-        exp = i
-        sum += p[i] * (x.toDouble().pow(exp)).toInt()
+        sum += p[i] * exp
+        exp *= x
     }
     return sum
 }
@@ -203,11 +202,7 @@ fun polynom(p: List<Int>, x: Int): Int {
  * Обратите внимание, что данная функция должна изменять содержание списка list, а не его копии.
  */
 fun accumulate(list: MutableList<Int>): MutableList<Int> {
-    var sum = 0
-    for (i in 0 until list.size) {
-        sum += list[i]
-        list[i] = sum
-    }
+    for (i in 1 until list.size) list[i] += list[i - 1]
     return list
 }
 
@@ -221,16 +216,14 @@ fun accumulate(list: MutableList<Int>): MutableList<Int> {
 fun factorize(n: Int): List<Int> {
     val result = mutableListOf<Int>()
     var a = n
-    while (a > 1) {
-        for (i in 2..n) {
-            if (a % i == 0) {
-                result.add(i)
-                a /= i
-                break
-            }
+    for (i in 2..sqrt(a.toDouble()).toInt()) {
+        while (a % i == 0) {
+            result.add(i)
+            a /= i
         }
     }
-    return result.sorted()
+    if (a != 1) result.add(a)
+    return result
 }
 
 /**
@@ -249,7 +242,16 @@ fun factorizeToString(n: Int): String =
  * Результат перевода вернуть в виде списка цифр в base-ичной системе от старшей к младшей,
  * например: n = 100, base = 4 -> (1, 2, 1, 0) или n = 250, base = 14 -> (1, 3, 12)
  */
-fun convert(n: Int, base: Int): List<Int> = TODO()
+fun convert(n: Int, base: Int): List<Int> {
+    val list = mutableListOf<Int>()
+    var num = n
+    do {
+        list.add(num % base)
+        num /= base
+    } while (num > 0)
+    list.reverse()
+    return list
+}
 
 /**
  * Сложная (4 балла)
@@ -262,7 +264,13 @@ fun convert(n: Int, base: Int): List<Int> = TODO()
  * Использовать функции стандартной библиотеки, напрямую и полностью решающие данную задачу
  * (например, n.toString(base) и подобные), запрещается.
  */
-fun convertToString(n: Int, base: Int): String = TODO()
+fun convertToString(n: Int, base: Int): String {
+    val letters = "abcdefghijklmnopqrstuvwxyz"
+    return convert(n, base).joinToString(
+        separator = "",
+        transform = { if (it > 9) letters[it - 10].toString() else "$it" }
+    )
+}
 
 /**
  * Средняя (3 балла)
