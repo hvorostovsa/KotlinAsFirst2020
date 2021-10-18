@@ -3,6 +3,7 @@
 package lesson4.task1
 
 import lesson1.task1.discriminant
+import kotlin.math.pow
 import kotlin.math.sqrt
 
 // Урок 4: списки
@@ -279,7 +280,15 @@ fun convertToString(n: Int, base: Int): String {
  * из системы счисления с основанием base в десятичную.
  * Например: digits = (1, 3, 12), base = 14 -> 250
  */
-fun decimal(digits: List<Int>, base: Int): Int = TODO()
+fun decimal(digits: List<Int>, base: Int): Int {
+    var number = 0
+    var exp = (base.toDouble().pow(digits.size - 1)).toInt()
+    for (i in 0 until digits.size) {
+        number += digits[i] * exp
+        exp /= base
+    }
+    return number
+}
 
 /**
  * Сложная (4 балла)
@@ -293,7 +302,15 @@ fun decimal(digits: List<Int>, base: Int): Int = TODO()
  * Использовать функции стандартной библиотеки, напрямую и полностью решающие данную задачу
  * (например, str.toInt(base)), запрещается.
  */
-fun decimalFromString(str: String, base: Int): Int = TODO()
+fun decimalFromString(str: String, base: Int): Int {
+    val letters = "abcdefghijklmnopqrstuvwxyz"
+    val list = mutableListOf<Int>()
+    for (i in 0 until str.length) {
+        if (str[i] in letters) list.add(letters.indexOf(str[i]) + 10)
+        else list.add(str[i].digitToInt())
+    }
+    return decimal(list, base)
+}
 
 /**
  * Сложная (5 баллов)
@@ -303,7 +320,34 @@ fun decimalFromString(str: String, base: Int): Int = TODO()
  * 90 = XC, 100 = C, 400 = CD, 500 = D, 900 = CM, 1000 = M.
  * Например: 23 = XXIII, 44 = XLIV, 100 = C
  */
-fun roman(n: Int): String = TODO()
+fun roman(n: Int): String {
+    var result = ""
+    val thousands = n / 1000
+    val hundreds = n / 100 % 10
+    val tens = n / 10 % 10
+    val ones = n % 10
+    if (thousands > 0) result += "M".repeat(thousands)
+    if (hundreds in 5..8) result += "D"
+    when (hundreds) {
+        in 1..3, in 6..8 -> result += "C".repeat(if (hundreds > 5) hundreds - 5 else hundreds)
+        4 -> result += "CD"
+        9 -> result += "CM"
+    }
+    if (tens in 5..8) result += "L"
+    when (tens) {
+        in 1..3, in 6..8 -> result += "X".repeat(if (tens > 5) tens - 5 else tens)
+        4 -> result += "XL"
+        9 -> result += "XC"
+    }
+    if (ones in 5..8) result += "V"
+    when (ones) {
+        in 1..3, in 6..8 -> result += "I".repeat(if (ones > 5) ones - 5 else ones)
+        4 -> result += "IV"
+        9 -> result += "IX"
+    }
+    return result
+}
+
 
 /**
  * Очень сложная (7 баллов)
