@@ -2,6 +2,10 @@
 
 package lesson8.task1
 
+import kotlin.IllegalArgumentException
+import kotlin.math.abs
+import kotlin.math.max
+
 /**
  * Точка (гекс) на шестиугольной сетке.
  * Координаты заданы как в примере (первая цифра - y, вторая цифра - x)
@@ -36,7 +40,10 @@ data class HexPoint(val x: Int, val y: Int) {
      * Расстояние вычисляется как число единичных отрезков в пути между двумя гексами.
      * Например, путь межу гексами 16 и 41 (см. выше) может проходить через 25, 34, 43 и 42 и имеет длину 5.
      */
-    fun distance(other: HexPoint): Int = TODO()
+    fun distance(other: HexPoint): Int = when {
+        (x >= other.x && y >= other.y) || (x <= other.x && y <= other.y) -> abs(x - other.x) + abs(y - other.y)
+        else -> max(abs(x - other.x), abs(y - other.y))
+    }
 
     override fun toString(): String = "$y.$x"
 }
@@ -59,14 +66,15 @@ data class Hexagon(val center: HexPoint, val radius: Int) {
      * и другим шестиугольником B с центром в 26 и радиуоом 2 равно 2
      * (расстояние между точками 32 и 24)
      */
-    fun distance(other: Hexagon): Int = TODO()
+    fun distance(other: Hexagon): Int =
+        max(center.distance(other.center) - radius - other.radius, 0)
 
     /**
      * Тривиальная (1 балл)
      *
      * Вернуть true, если заданная точка находится внутри или на границе шестиугольника
      */
-    fun contains(point: HexPoint): Boolean = TODO()
+    fun contains(point: HexPoint): Boolean = center.distance(point) <= radius
 }
 
 /**
@@ -81,7 +89,7 @@ class HexSegment(val begin: HexPoint, val end: HexPoint) {
      * Такими являются, например, отрезок 30-34 (горизонталь), 13-63 (прямая диагональ) или 51-24 (косая диагональ).
      * А, например, 13-26 не является "правильным" отрезком.
      */
-    fun isValid(): Boolean = TODO()
+    fun isValid(): Boolean = begin.x == end.x || begin.y == end.y || begin.x + begin.y == end.x + end.y
 
     /**
      * Средняя (3 балла)
@@ -90,7 +98,18 @@ class HexSegment(val begin: HexPoint, val end: HexPoint) {
      * Для "правильного" отрезка выбирается одно из первых шести направлений,
      * для "неправильного" -- INCORRECT.
      */
-    fun direction(): Direction = TODO()
+    fun direction(): Direction = when {
+        this.begin.y == this.end.y ->
+            if (this.begin.x <= this.end.x) Direction.RIGHT else Direction.LEFT
+
+        this.begin.x == this.end.x ->
+            if (this.begin.y <= this.end.y) Direction.UP_RIGHT else Direction.DOWN_LEFT
+
+        this.begin.x + this.begin.y == this.end.x + this.end.y ->
+            if (this.begin.y <= this.end.y) Direction.UP_LEFT else Direction.DOWN_RIGHT
+
+        else -> Direction.INCORRECT
+    }
 
     override fun equals(other: Any?) =
         other is HexSegment && (begin == other.begin && end == other.end || end == other.begin && begin == other.end)
@@ -119,7 +138,15 @@ enum class Direction {
      * Вернуть направление, противоположное данному.
      * Для INCORRECT вернуть INCORRECT
      */
-    fun opposite(): Direction = TODO()
+    fun opposite(): Direction = when (this) {
+        RIGHT -> LEFT
+        UP_RIGHT -> DOWN_LEFT
+        UP_LEFT -> DOWN_RIGHT
+        LEFT -> RIGHT
+        DOWN_LEFT -> UP_RIGHT
+        DOWN_RIGHT -> UP_LEFT
+        else -> INCORRECT
+    }
 
     /**
      * Средняя (3 балла)
@@ -131,7 +158,11 @@ enum class Direction {
      * Для направления INCORRECT бросить исключение IllegalArgumentException.
      * При решении этой задачи попробуйте обойтись без перечисления всех семи вариантов.
      */
-    fun next(): Direction = TODO()
+    fun next(): Direction {
+        if (this == INCORRECT) throw IllegalArgumentException("Incorrect direction")
+        val data = listOf(UP_LEFT, UP_RIGHT, RIGHT, DOWN_RIGHT, DOWN_LEFT, LEFT)
+        return data[(data.indexOf(this) + data.size - 1) % data.size]
+    }
 
     /**
      * Простая (2 балла)
@@ -139,7 +170,10 @@ enum class Direction {
      * Вернуть true, если данное направление совпадает с other или противоположно ему.
      * INCORRECT не параллельно никакому направлению, в том числе другому INCORRECT.
      */
-    fun isParallel(other: Direction): Boolean = TODO()
+    fun isParallel(other: Direction): Boolean = when (this) {
+        INCORRECT -> false
+        else -> this == other || this == other.opposite()
+    }
 }
 
 /**
@@ -155,7 +189,21 @@ enum class Direction {
  * 35, direction = UP_LEFT, distance = 2 --> 53
  * 45, direction = DOWN_LEFT, distance = 4 --> 05
  */
-fun HexPoint.move(direction: Direction, distance: Int): HexPoint = TODO()
+fun HexPoint.move(direction: Direction, distance: Int): HexPoint {
+    var directionClone = direction
+    var distanceClone = distance
+    if (directionClone == Direction.INCORRECT) throw IllegalArgumentException("Incorrect direction")
+    if (directionClone in listOf(Direction.LEFT, Direction.DOWN_LEFT, Direction.DOWN_RIGHT)) {
+        directionClone = directionClone.opposite()
+        distanceClone *= -1
+    }
+    return when (directionClone) {
+        Direction.RIGHT -> HexPoint(this.x + distanceClone, this.y)
+        Direction.UP_RIGHT -> HexPoint(this.x, this.y + distanceClone)
+        Direction.UP_LEFT -> HexPoint(this.x - distanceClone, this.y + distanceClone)
+        else -> throw IllegalArgumentException("Something went wrong") // Never be reached
+    }
+}
 
 /**
  * Сложная (5 баллов)
@@ -175,7 +223,31 @@ fun HexPoint.move(direction: Direction, distance: Int): HexPoint = TODO()
  *       HexPoint(y = 5, x = 3)
  *     )
  */
-fun pathBetweenHexes(from: HexPoint, to: HexPoint): List<HexPoint> = TODO()
+fun pathBetweenHexes(from: HexPoint, to: HexPoint): List<HexPoint> {
+    val trajectoryX = if (from.x <= to.x) 1 else -1
+    val trajectoryY = if (from.y <= to.y) 1 else -1
+    val list = mutableListOf(from)
+    val number = from.distance(to)
+    var lastX = from.x
+    var lastY = from.y
+    if ((from.x >= to.x && from.y >= to.y) || (from.x <= to.x && from.y <= to.y)) {
+        for (i in 0 until number - 1) {
+            if (lastX != to.x) lastX += trajectoryX
+            else lastY += trajectoryY
+            list.add(HexPoint(lastX, lastY))
+        }
+    } else {
+        for (i in 0 until number - 1) {
+            if (lastX != to.x) {
+                lastX += trajectoryX
+                if (lastY != to.y) lastY += trajectoryY
+            } else lastY += trajectoryY
+            list.add(HexPoint(lastX, lastY))
+        }
+    }
+    list.add(to)
+    return list
+}
 
 /**
  * Очень сложная (20 баллов)
@@ -192,7 +264,35 @@ fun pathBetweenHexes(from: HexPoint, to: HexPoint): List<HexPoint> = TODO()
  *
  * Если все три точки совпадают, вернуть шестиугольник нулевого радиуса с центром в данной точке.
  */
-fun hexagonByThreePoints(a: HexPoint, b: HexPoint, c: HexPoint): Hexagon? = TODO()
+fun hexagonByThreePoints(a: HexPoint, b: HexPoint, c: HexPoint): Hexagon? {
+    if (a == b && b == c) return Hexagon(a, 0)
+
+    val maxRadius = max(max(a.distance(b), a.distance(c)), b.distance(c))
+
+    for (radius in 1..maxRadius) {
+        val goodPoints = getAllPointsInDistance(a, radius)
+            .intersect(getAllPointsInDistance(b, radius))
+            .intersect(getAllPointsInDistance(c, radius))
+        if (goodPoints.isNotEmpty()) return Hexagon(goodPoints.first(), radius)
+    }
+
+    return null
+}
+
+fun getAllPointsInDistance(center: HexPoint, distance: Int): Set<HexPoint> {
+    // Иду по кругу на расстоянии distance, все пройденные клетки записываю в set
+    val set = mutableSetOf<HexPoint>()
+    var pointNow = HexPoint(center.x, center.y + distance)
+    var direction = Direction.LEFT
+    for (i in 0 until 6) {
+        for (ii in 0 until distance) {
+            set.add(pointNow)
+            pointNow = pointNow.move(direction, 1)
+        }
+        direction = direction.next()
+    }
+    return set
+}
 
 /**
  * Очень сложная (20 баллов)
