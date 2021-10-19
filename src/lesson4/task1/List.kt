@@ -126,9 +126,9 @@ fun abs(v: List<Double>): Double {
     for (element in v) {
         result += element * element
     }
-    result = sqrt(result)
-    return result
+    return sqrt(result)
 }
+
 /**
  * Простая (2 балла)
  *
@@ -143,6 +143,7 @@ fun mean(list: List<Double>): Double {
     result /= list.size
     return result
 }
+
 /**
  * Средняя (3 балла)
  *
@@ -236,6 +237,7 @@ fun factorize(n: Int): List<Int> {
  */
 fun factorizeToString(n: Int): String =
     factorize(n).joinToString(separator = "*")
+
 /**
  * Средняя (3 балла)
  *
@@ -283,8 +285,8 @@ fun convertToString(n: Int, base: Int): String {
 fun decimal(digits: List<Int>, base: Int): Int {
     var number = 0
     var exp = (base.toDouble().pow(digits.size - 1)).toInt()
-    for (i in 0 until digits.size) {
-        number += digits[i] * exp
+    for (element in digits) {
+        number += element * exp
         exp /= base
     }
     return number
@@ -306,7 +308,7 @@ fun decimalFromString(str: String, base: Int): Int {
     val letters = "abcdefghijklmnopqrstuvwxyz"
     val list = mutableListOf<Int>()
     for (i in 0 until str.length) {
-        if (str[i] in letters) list.add(letters.indexOf(str[i]) + 10)
+        if (str[i] in letters) list.add(str[i] - 'a' + 10)
         else list.add(str[i].digitToInt())
     }
     return decimal(list, base)
@@ -320,31 +322,27 @@ fun decimalFromString(str: String, base: Int): Int {
  * 90 = XC, 100 = C, 400 = CD, 500 = D, 900 = CM, 1000 = M.
  * Например: 23 = XXIII, 44 = XLIV, 100 = C
  */
+fun partOfRoman(rank: Int, charForRank: Char, charForNextRank: Char, halfNextRank: Char): String {
+    var partOfResult = buildString { }
+    if (rank in 5..8) partOfResult += "$halfNextRank"
+    when (rank) {
+        in 1..3, in 6..8 -> partOfResult += "$charForRank".repeat(if (rank > 5) rank - 5 else rank)
+        4 -> partOfResult += "$charForRank$halfNextRank"
+        9 -> partOfResult += "$charForRank$charForNextRank"
+    }
+    return partOfResult
+}
+
 fun roman(n: Int): String {
-    var result = ""
+    var result = buildString { }
     val thousands = n / 1000
     val hundreds = n / 100 % 10
     val tens = n / 10 % 10
     val ones = n % 10
     if (thousands > 0) result += "M".repeat(thousands)
-    if (hundreds in 5..8) result += "D"
-    when (hundreds) {
-        in 1..3, in 6..8 -> result += "C".repeat(if (hundreds > 5) hundreds - 5 else hundreds)
-        4 -> result += "CD"
-        9 -> result += "CM"
-    }
-    if (tens in 5..8) result += "L"
-    when (tens) {
-        in 1..3, in 6..8 -> result += "X".repeat(if (tens > 5) tens - 5 else tens)
-        4 -> result += "XL"
-        9 -> result += "XC"
-    }
-    if (ones in 5..8) result += "V"
-    when (ones) {
-        in 1..3, in 6..8 -> result += "I".repeat(if (ones > 5) ones - 5 else ones)
-        4 -> result += "IV"
-        9 -> result += "IX"
-    }
+    result += partOfRoman(hundreds, 'C', 'M', 'D')
+    result += partOfRoman(tens, 'X', 'C', 'L')
+    result += partOfRoman(ones, 'I', 'X', 'V')
     return result
 }
 
