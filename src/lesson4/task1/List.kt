@@ -305,10 +305,9 @@ fun decimal(digits: List<Int>, base: Int): Int {
  * (например, str.toInt(base)), запрещается.
  */
 fun decimalFromString(str: String, base: Int): Int {
-    val letters = "abcdefghijklmnopqrstuvwxyz"
     val list = mutableListOf<Int>()
     for (i in 0 until str.length) {
-        if (str[i] in letters) list.add(str[i] - 'a' + 10)
+        if (str[i].code > 64) list.add(str[i] - 'a' + 10)
         else list.add(str[i].digitToInt())
     }
     return decimal(list, base)
@@ -323,26 +322,28 @@ fun decimalFromString(str: String, base: Int): Int {
  * Например: 23 = XXIII, 44 = XLIV, 100 = C
  */
 fun partOfRoman(rank: Int, charForRank: Char, charForNextRank: Char, halfNextRank: Char): String {
-    var partOfResult = buildString { }
-    if (rank in 5..8) partOfResult += "$halfNextRank"
-    when (rank) {
-        in 1..3, in 6..8 -> partOfResult += "$charForRank".repeat(if (rank > 5) rank - 5 else rank)
-        4 -> partOfResult += "$charForRank$halfNextRank"
-        9 -> partOfResult += "$charForRank$charForNextRank"
+    val partOfResult = buildString {
+        if (rank in 5..8) append("$halfNextRank")
+        when (rank) {
+            in 1..3, in 6..8 -> append("$charForRank".repeat(if (rank > 5) rank - 5 else rank))
+            4 -> append("$charForRank$halfNextRank")
+            9 -> append("$charForRank$charForNextRank")
+        }
     }
     return partOfResult
 }
 
 fun roman(n: Int): String {
-    var result = buildString { }
     val thousands = n / 1000
     val hundreds = n / 100 % 10
     val tens = n / 10 % 10
     val ones = n % 10
-    if (thousands > 0) result += "M".repeat(thousands)
-    result += partOfRoman(hundreds, 'C', 'M', 'D')
-    result += partOfRoman(tens, 'X', 'C', 'L')
-    result += partOfRoman(ones, 'I', 'X', 'V')
+    val result = buildString {
+        if (thousands > 0) append("M".repeat(thousands))
+        append(partOfRoman(hundreds, 'C', 'M', 'D'))
+        append(partOfRoman(tens, 'X', 'C', 'L'))
+        append(partOfRoman(ones, 'I', 'X', 'V'))
+    }
     return result
 }
 
