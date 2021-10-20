@@ -81,12 +81,13 @@ fun deleteMarked(inputName: String, outputName: String) {
  *
  */
 fun countSubstrings(inputName: String, substrings: List<String>): Map<String, Int> {
-    val map = substrings.map { it to 0 }.toMutableMap()
-    val substringsLowercase = substrings.map { it.lowercase() }
+    val substringsU = substrings.toSet().toList()
+    val map = substringsU.map { it to 0 }.toMutableMap()
+    val substringsLowercase = substringsU.map { it.lowercase() }
     File(inputName).forEachLine { line ->
         val lineLowercase = line.lowercase()
         for ((i, substring) in substringsLowercase.withIndex()) {
-            map[substrings[i]] = map[substrings[i]]!! + substringsCount(lineLowercase, substring)
+            map[substringsU[i]] = map[substringsU[i]]!! + substringsCount(lineLowercase, substring)
         }
     }
     return map
@@ -155,7 +156,7 @@ fun sibilants(inputName: String, outputName: String) {
  */
 fun centerFile(inputName: String, outputName: String) {
     val lines = File(inputName).readLines().map { it.trim() }
-    val length = lines.maxOf { it.length }
+    val length = if (lines.isNotEmpty()) lines.maxOf { it.length } else 0
     File(outputName).bufferedWriter().use { writer ->
         lines.forEach { line ->
             val leftIndent = (length - line.length) / 2
@@ -193,7 +194,7 @@ fun centerFile(inputName: String, outputName: String) {
  */
 fun alignFileByWidth(inputName: String, outputName: String) {
     val lines = File(inputName).readLines().map { it.trim().split(Regex("\\s+")) }
-    val length = lines.maxOf { it.joinToString(" ").length }
+    val length = if (lines.isNotEmpty()) lines.maxOf { it.joinToString(" ").length } else 0
     File(outputName).bufferedWriter().use { writer ->
         lines.forEach { line ->
             if (line.isEmpty()) writer.newLine()
@@ -236,13 +237,11 @@ fun alignFileByWidth(inputName: String, outputName: String) {
  * Ключи в ассоциативном массиве должны быть в нижнем регистре.
  *
  */
-// Я знаю, что не работает. Не понимаю - в чём ошибка
 fun top20Words(inputName: String): Map<String, Int> {
     val map = mutableMapOf<String, Int>()
 
     File(inputName).forEachLine { line ->
-        val newLine = line.trim().lowercase().replace(Regex("""[^\sa-zа-яё]"""), "")
-        println(newLine)
+        val newLine = line.trim().lowercase().replace(Regex("""[^\sa-zа-яё]"""), " ")
         for (word in newLine.split(Regex("\\s+"))) {
             if (word.isNotBlank()) map[word] = map.getOrDefault(word, 0) + 1
         }
@@ -292,13 +291,14 @@ fun transliterate(inputName: String, dictionary: Map<Char, String>, outputName: 
     val newDictionary = dictionary.map { it.key.lowercaseChar() to it.value.lowercase() }.toMap()
     File(outputName).bufferedWriter().use { writer ->
         File(inputName).forEachLine { line ->
-            var resultLine = ""
+            val resultLine = StringBuilder()
             line.forEach { char ->
                 val lowerChar = char.lowercaseChar()
                 if (lowerChar in newDictionary) {
-                    if (char.isLowerCase()) resultLine += newDictionary[lowerChar]
-                    else resultLine += newDictionary[lowerChar]!!.replaceFirstChar { it.uppercaseChar() }
-                } else resultLine += char
+                    if (char.isUpperCase()) {
+                        resultLine.append(newDictionary[lowerChar]!!.replaceFirstChar { it.uppercaseChar() })
+                    } else resultLine.append(newDictionary[lowerChar])
+                } else resultLine.append(char)
             }
             writer.write("$resultLine\n")
         }
@@ -417,9 +417,10 @@ fun markdownParagraph(paragraph: String): String {
         if (c == '*') { // stars checking
             if (paragraph.getOrNull(i + 1) == '*') {
                 if (paragraph.getOrNull(i + 2) == '*') { // 3 stars
-                    if (stack > 0) {
+                    if (stack == 3) {
                         result.append(if (cursiveLast) "</i></b>" else "</b></i>")
                         stack = 0
+                        cursiveLast = false
                     } else {
                         result.append("<b><i>")
                         stack = 3

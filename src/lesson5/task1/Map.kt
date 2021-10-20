@@ -221,7 +221,6 @@ fun findCheapestStuff(stuff: Map<String, Pair<String, Double>>, kind: String): S
     stuff.filter { it.value.first == kind }.minByOrNull { it.value.second }?.key
 
 
-
 /**
  * Средняя (3 балла)
  *
@@ -254,6 +253,7 @@ fun canBuildFrom(chars: List<Char>, word: String): Boolean {
  */
 fun extractRepeats(list: List<String>): Map<String, Int> =
     list.groupBy { it }.map { Pair(it.key, it.value.size) }.filter { it.second > 1 }.toMap()
+
 /**
  * Средняя (3 балла)
  *
@@ -357,15 +357,16 @@ fun getSetOfFriends(
  *   findSumOfTwo(listOf(1, 2, 3), 6) -> Pair(-1, -1)
  */
 fun findSumOfTwo(list: List<Int>, number: Int): Pair<Int, Int> {
-    val numbers = list.groupBy { it }.mapValues { it.value.size }
-    for (n in list) {
+    val numbers = mutableMapOf<Int, MutableList<Int>>()
+    list.forEachIndexed { i, n -> numbers.getOrPut(n) { mutableListOf() }.add(i) }
+    for ((n, indexes) in numbers) {
         if (number - n in numbers) {
             if (number - n == n) {
-                if (numbers[n]!! < 2) continue
-                return Pair(list.indexOf(n), list.lastIndexOf(n))
+                if (indexes.size < 2) continue
+                return Pair(indexes[0], indexes[1])
             }
-            val indexes = listOf(list.indexOf(n), list.indexOf(number - n)).sorted()
-            return Pair(indexes[0], indexes[1])
+            val result = listOf(indexes[0], numbers[number - n]!![0]).sorted()
+            return Pair(result[0], result[1])
         }
     }
     return Pair(-1, -1)

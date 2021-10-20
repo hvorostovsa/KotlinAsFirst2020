@@ -89,7 +89,8 @@ class HexSegment(val begin: HexPoint, val end: HexPoint) {
      * Такими являются, например, отрезок 30-34 (горизонталь), 13-63 (прямая диагональ) или 51-24 (косая диагональ).
      * А, например, 13-26 не является "правильным" отрезком.
      */
-    fun isValid(): Boolean = begin.x == end.x || begin.y == end.y || begin.x + begin.y == end.x + end.y
+    fun isValid(): Boolean = (begin != end) &&
+            (begin.x == end.x || begin.y == end.y || begin.x + begin.y == end.x + end.y)
 
     /**
      * Средняя (3 балла)
@@ -99,6 +100,8 @@ class HexSegment(val begin: HexPoint, val end: HexPoint) {
      * для "неправильного" -- INCORRECT.
      */
     fun direction(): Direction = when {
+        this.begin == this.end -> Direction.INCORRECT
+
         this.begin.y == this.end.y ->
             if (this.begin.x <= this.end.x) Direction.RIGHT else Direction.LEFT
 
@@ -268,8 +271,9 @@ fun hexagonByThreePoints(a: HexPoint, b: HexPoint, c: HexPoint): Hexagon? {
     if (a == b && b == c) return Hexagon(a, 0)
 
     val maxRadius = max(max(a.distance(b), a.distance(c)), b.distance(c))
+    val minRadius = max(1, maxRadius / 2)
 
-    for (radius in 1..maxRadius) {
+    for (radius in minRadius..maxRadius) {
         val goodPoints = getAllPointsInDistance(a, radius)
             .intersect(getAllPointsInDistance(b, radius))
             .intersect(getAllPointsInDistance(c, radius))
