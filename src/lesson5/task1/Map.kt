@@ -2,7 +2,6 @@
 
 package lesson5.task1
 
-import ru.spbstu.wheels.toMutableMap
 
 // Урок 5: ассоциативные массивы и множества
 // Максимальное количество баллов = 14
