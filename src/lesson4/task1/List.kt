@@ -307,7 +307,7 @@ fun decimal(digits: List<Int>, base: Int): Int {
 fun decimalFromString(str: String, base: Int): Int {
     val list = mutableListOf<Int>()
     for (i in 0 until str.length) {
-        if (str[i].code > 64) list.add(str[i] - 'a' + 10)
+        if (str[i].code >= 'a'.code) list.add(str[i] - 'a' + 10)
         else list.add(str[i].digitToInt())
     }
     return decimal(list, base)
@@ -322,7 +322,7 @@ fun decimalFromString(str: String, base: Int): Int {
  * Например: 23 = XXIII, 44 = XLIV, 100 = C
  */
 fun partOfRoman(rank: Int, charForRank: Char, charForNextRank: Char, halfNextRank: Char): String {
-    val partOfResult = buildString {
+    return buildString {
         if (rank in 5..8) append("$halfNextRank")
         when (rank) {
             in 1..3, in 6..8 -> append("$charForRank".repeat(if (rank > 5) rank - 5 else rank))
@@ -330,7 +330,6 @@ fun partOfRoman(rank: Int, charForRank: Char, charForNextRank: Char, halfNextRan
             9 -> append("$charForRank$charForNextRank")
         }
     }
-    return partOfResult
 }
 
 fun roman(n: Int): String {
@@ -355,4 +354,41 @@ fun roman(n: Int): String {
  * Например, 375 = "триста семьдесят пять",
  * 23964 = "двадцать три тысячи девятьсот шестьдесят четыре"
  */
-fun russian(n: Int): String = TODO()
+
+// Еще не сделал, оставил на попозже, не нужно проверять.
+
+fun russian(n: Int): String {
+    val fromOneToNine = mutableListOf<String>(
+        "один", "два", "три",
+        "четыре", "пять", "шесть",
+        "семь", "восемь", "девять",
+        "одна", "две"
+    )
+
+    val fromTenToNineteen = mutableListOf<String>(
+        "десять", "одиннадцать", "двенадцать",
+        "тринадцать", "четырнадцать", "пятнадцать",
+        "шестнадцать", "семнадцать", "восемнадцать",
+        "девятнадцать"
+    )
+
+    val fromTwentyToNinety = mutableListOf<String>(
+        "двадцать", "тридцать", "сорок",
+        "пятьдесят", "шестьдесят", "семьдесят",
+        "восемьдесят", "девяносто"
+    )
+
+    val fromHundredToThousand = mutableListOf<String>(
+        "сто", "двести", "триста",
+        "четыреста", "пятьсот", "шестьсот",
+        "семьсот", "восемьсот", "девятьсот"
+    )
+
+    val hundredsOfThousands = n / 100000
+    val tensOfThousands = n / 10000 % 10
+    val thousands = n / 1000 % 10
+    val hundreds = n / 100 % 10
+    val tens = n / 10 % 10
+    val ones = n % 10
+    TODO()
+}
