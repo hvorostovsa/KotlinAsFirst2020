@@ -397,9 +397,9 @@ fun russian(n: Int): String {
         else if (thousands > 0) append(fromOneToNine[thousands - 1], " ")
         when {
             thousands == 0 && (hundredsOfThousands != 0 || tensOfThousands != 0) -> append("тысяч ")
-            thousands in 5..9 -> append("тысяч ")
-            thousands == 1 -> append("тысяча ")
-            thousands in 2..4 -> append("тысячи ")
+            thousands in 5..9 || tensOfThousands == 1 -> append("тысяч ")
+            thousands == 1 && tensOfThousands != 1 -> append("тысяча ")
+            thousands in 2..4 && tensOfThousands != 1 -> append("тысячи ")
         }
         if (hundreds > 0) append(fromHundredToThousand[hundreds - 1], " ")
         if (tens > 1) append(fromTwentyToNinety[tens - 2], " ")
