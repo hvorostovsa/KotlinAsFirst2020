@@ -148,13 +148,9 @@ fun subtractOf(a: MutableMap<String, String>, b: Map<String, String>) {
  * т. е. whoAreInBoth(listOf("Марат", "Семён, "Марат"), listOf("Марат", "Марат")) == listOf("Марат")
  */
 fun whoAreInBoth(a: List<String>, b: List<String>): List<String> {
-    val firstSet = mutableSetOf<String>()
-    val secondSet = mutableSetOf<String>()
     val result = mutableListOf<String>()
-    for (name in a) firstSet.add(name)
-    for (name in b) secondSet.add(name)
-    for (name in firstSet) {
-        if (name in secondSet) result.add(name)
+    for (name in a.toSet()) {
+        if (name in b.toSet()) result.add(name)
     }
     return result
 }
@@ -197,20 +193,17 @@ fun mergePhoneBooks(mapA: Map<String, String>, mapB: Map<String, String>): Map<S
  *   averageStockPrice(listOf("MSFT" to 100.0, "MSFT" to 200.0, "NFLX" to 40.0))
  *     -> mapOf("MSFT" to 150.0, "NFLX" to 40.0)
  */
-fun stockInList(nameOfStock: String, list: List<Pair<String, Double>>): Int {
-    var k = 0
-    for ((stock) in list) {
-        if (nameOfStock == stock) k++
-    }
-    return k
-}
 
 fun averageStockPrice(stockPrices: List<Pair<String, Double>>): Map<String, Double> {
-    val map = mutableMapOf<String, Double>()
+    val result = mutableMapOf<String, Double>()
+    val map = mutableMapOf<String, List<Double>>()
     for ((stock, price) in stockPrices) {
-        map[stock] = map.getOrDefault(stock, 0.0) + price / stockInList(stock, stockPrices)
+        map[stock] = map.getOrDefault(stock, listOf()) + price
     }
-    return map
+    for ((stock, prices) in map) {
+        result[stock] = result.getOrDefault(stock, 0.0) + prices.sum() / prices.size
+    }
+    return result
 }
 
 /**

@@ -321,8 +321,8 @@ fun decimalFromString(str: String, base: Int): Int {
  * 90 = XC, 100 = C, 400 = CD, 500 = D, 900 = CM, 1000 = M.
  * Например: 23 = XXIII, 44 = XLIV, 100 = C
  */
-fun partOfRoman(rank: Int, charForRank: Char, charForNextRank: Char, halfNextRank: Char): String {
-    return buildString {
+fun partOfRoman(rank: Int, charForRank: Char, charForNextRank: Char, halfNextRank: Char): String =
+    buildString {
         if (rank in 5..8) append("$halfNextRank")
         when (rank) {
             in 1..3, in 6..8 -> append("$charForRank".repeat(if (rank > 5) rank - 5 else rank))
@@ -330,7 +330,7 @@ fun partOfRoman(rank: Int, charForRank: Char, charForNextRank: Char, halfNextRan
             9 -> append("$charForRank$charForNextRank")
         }
     }
-}
+
 
 fun roman(n: Int): String {
     val thousands = n / 1000
@@ -355,14 +355,13 @@ fun roman(n: Int): String {
  * 23964 = "двадцать три тысячи девятьсот шестьдесят четыре"
  */
 
-// Еще не сделал, оставил на попозже, не нужно проверять.
-
 fun russian(n: Int): String {
+
     val fromOneToNine = mutableListOf<String>(
-        "один", "два", "три",
+        "одна", "две", "три",
         "четыре", "пять", "шесть",
         "семь", "восемь", "девять",
-        "одна", "две"
+        "один", "два"
     )
 
     val fromTenToNineteen = mutableListOf<String>(
@@ -390,5 +389,22 @@ fun russian(n: Int): String {
     val hundreds = n / 100 % 10
     val tens = n / 10 % 10
     val ones = n % 10
-    TODO()
+
+    val result = buildString {
+        if (hundredsOfThousands > 0) append(fromHundredToThousand[hundredsOfThousands - 1], " ")
+        if (tensOfThousands > 1) append(fromTwentyToNinety[tensOfThousands - 2], " ")
+        if (tensOfThousands == 1) append(fromTenToNineteen[thousands], " ")
+        else if (thousands > 0) append(fromOneToNine[thousands - 1], " ")
+        when {
+            thousands == 0 && (hundredsOfThousands != 0 || tensOfThousands != 0) -> append("тысяч ")
+            thousands in 5..9 -> append("тысяч ")
+            thousands == 1 -> append("тысяча ")
+            thousands in 2..4 -> append("тысячи ")
+        }
+        if (hundreds > 0) append(fromHundredToThousand[hundreds - 1], " ")
+        if (tens > 1) append(fromTwentyToNinety[tens - 2], " ")
+        if (tens == 1) append(fromTenToNineteen[ones], " ")
+        else if (ones > 0) append(fromOneToNine[if (ones in 1..2) ones + 8 else ones - 1], " ")
+    }
+    return result.trim()
 }
