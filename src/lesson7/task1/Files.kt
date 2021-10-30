@@ -428,7 +428,7 @@ fun markdownParagraph(paragraph: String): String {
                     }
                     i += 2
                 } else { // 2 stars
-                    if (stack >= 2) {
+                    if (stack == 2 || stack == 3) {
                         result.append("</b>")
                         stack -= 2
                         cursiveLast = true
@@ -440,7 +440,7 @@ fun markdownParagraph(paragraph: String): String {
                     i += 1
                 }
             } else { // 1 star
-                if (stack >= 1) {
+                if (stack == 1 || stack == 3) {
                     result.append("</i>")
                     stack -= 1
                     cursiveLast = false
