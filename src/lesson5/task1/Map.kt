@@ -221,7 +221,14 @@ fun averageStockPrice(stockPrices: List<Pair<String, Double>>): Map<String, Doub
  *     "печенье"
  *   ) -> "Мария"
  */
-fun findCheapestStuff(stuff: Map<String, Pair<String, Double>>, kind: String): String? = TODO()
+fun findCheapestStuff(stuff: Map<String, Pair<String, Double>>, kind: String): String? {
+    val list = stuff.values.toList().map { it.second }
+    for ((name, pair) in stuff) {
+        if (kind == pair.first && pair.second == list.minOf { it }) return name
+    }
+    return null
+}
+
 
 /**
  * Средняя (3 балла)
@@ -232,7 +239,13 @@ fun findCheapestStuff(stuff: Map<String, Pair<String, Double>>, kind: String): S
  * Например:
  *   canBuildFrom(listOf('a', 'b', 'o'), "baobab") -> true
  */
-fun canBuildFrom(chars: List<Char>, word: String): Boolean = TODO()
+fun canBuildFrom(chars: List<Char>, word: String): Boolean {
+    val set = word.toSet()
+    for (letter in set) {
+        if (letter !in chars) return false
+    }
+    return true
+}
 
 /**
  * Средняя (4 балла)
@@ -246,7 +259,13 @@ fun canBuildFrom(chars: List<Char>, word: String): Boolean = TODO()
  * Например:
  *   extractRepeats(listOf("a", "b", "a")) -> mapOf("a" to 2)
  */
-fun extractRepeats(list: List<String>): Map<String, Int> = TODO()
+fun extractRepeats(list: List<String>): Map<String, Int> {
+    val map = mutableMapOf<String, Int>()
+    for (elem in list) {
+        map[elem] = map.getOrDefault(elem, 0) + 1
+    }
+    return map.filterValues { it > 1 }
+}
 
 /**
  * Средняя (3 балла)
@@ -261,6 +280,7 @@ fun extractRepeats(list: List<String>): Map<String, Int> = TODO()
  *   hasAnagrams(listOf("тор", "свет", "рот")) -> true
  */
 fun hasAnagrams(words: List<String>): Boolean = TODO()
+
 
 /**
  * Сложная (5 баллов)
@@ -296,7 +316,24 @@ fun hasAnagrams(words: List<String>): Boolean = TODO()
  *          "GoodGnome" to setOf()
  *        )
  */
-fun propagateHandshakes(friends: Map<String, Set<String>>): Map<String, Set<String>> = TODO()
+fun friendsOfFriend(friend: String, friends: Map<String, Set<String>>): Set<String> {
+    val result = mutableSetOf<String>()
+    for ((name, set) in friends) {
+        if (friend == name)
+            for (person in set) {
+                result += person + friendsOfFriend(person, friends)
+            }
+    }
+    return result
+}
+
+fun propagateHandshakes(friends: Map<String, Set<String>>): Map<String, Set<String>> {
+    val result = mutableMapOf<String, Set<String>>()
+    for ((name, set) in friends) {
+        result[name] = result.getOrDefault(name, setOf()) + friendsOfFriend(name, friends)
+    }
+    return result
+}
 
 /**
  * Сложная (6 баллов)

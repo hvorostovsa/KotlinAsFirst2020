@@ -357,27 +357,27 @@ fun roman(n: Int): String {
 
 fun russian(n: Int): String {
 
-    val fromOneToNine = mutableListOf<String>(
+    val fromOneToNine = listOf<String>(
         "одна", "две", "три",
         "четыре", "пять", "шесть",
         "семь", "восемь", "девять",
         "один", "два"
     )
 
-    val fromTenToNineteen = mutableListOf<String>(
+    val fromTenToNineteen = listOf<String>(
         "десять", "одиннадцать", "двенадцать",
         "тринадцать", "четырнадцать", "пятнадцать",
         "шестнадцать", "семнадцать", "восемнадцать",
         "девятнадцать"
     )
 
-    val fromTwentyToNinety = mutableListOf<String>(
+    val fromTwentyToNinety = listOf<String>(
         "двадцать", "тридцать", "сорок",
         "пятьдесят", "шестьдесят", "семьдесят",
         "восемьдесят", "девяносто"
     )
 
-    val fromHundredToThousand = mutableListOf<String>(
+    val fromHundredToThousand = listOf<String>(
         "сто", "двести", "триста",
         "четыреста", "пятьсот", "шестьсот",
         "семьсот", "восемьсот", "девятьсот"
