@@ -357,17 +357,10 @@ fun getSetOfFriends(
  *   findSumOfTwo(listOf(1, 2, 3), 6) -> Pair(-1, -1)
  */
 fun findSumOfTwo(list: List<Int>, number: Int): Pair<Int, Int> {
-    val numbers = mutableMapOf<Int, MutableList<Int>>()
-    list.forEachIndexed { i, n -> numbers.getOrPut(n) { mutableListOf() }.add(i) }
-    for ((n, indexes) in numbers) {
-        if (number - n in numbers) {
-            if (number - n == n) {
-                if (indexes.size < 2) continue
-                return Pair(indexes[0], indexes[1])
-            }
-            val result = listOf(indexes[0], numbers[number - n]!![0]).sorted()
-            return Pair(result[0], result[1])
-        }
+    val numbers = mutableMapOf<Int, Int>()
+    for ((i, n) in list.withIndex()) {
+        if (n in numbers) return Pair(numbers[n]!!, i)
+        numbers[number - n] = i
     }
     return Pair(-1, -1)
 }

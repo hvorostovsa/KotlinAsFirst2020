@@ -122,14 +122,14 @@ fun sibilants(inputName: String, outputName: String) {
 
     File(outputName).bufferedWriter().use { writer ->
         File(inputName).forEachLine { line ->
-            var resultLine = line[0].toString()
+            val resultLine = StringBuilder(line[0].toString())
             for (i in 1 until line.length) {
                 val c = line[i]
                 val cLower = c.lowercaseChar()
                 if (line[i - 1].lowercaseChar() in goodLetters && cLower in toFix) {
-                    resultLine += if (c.isLowerCase()) toFix[cLower]!! else toFix[cLower]!!.uppercaseChar()
+                    resultLine.append(if (c.isLowerCase()) toFix[cLower]!! else toFix[cLower]!!.uppercaseChar())
                 } else {
-                    resultLine += c
+                    resultLine.append(c)
                 }
             }
             writer.write("$resultLine\n")
@@ -203,14 +203,14 @@ fun alignFileByWidth(inputName: String, outputName: String) {
                 val lengthNow = line.sumOf { it.length }
                 val spaceNumber = (length - lengthNow) / (line.size - 1)
                 val remainder = (length - lengthNow) % (line.size - 1)
-                var resultLine = ""
+                val resultLine = StringBuilder()
                 for (i in 0 until remainder) {
-                    resultLine += line[i] + " ".repeat(spaceNumber + 1)
+                    resultLine.append(line[i], " ".repeat(spaceNumber + 1))
                 }
                 for (i in remainder until line.size - 1) {
-                    resultLine += line[i] + " ".repeat(spaceNumber)
+                    resultLine.append(line[i], " ".repeat(spaceNumber))
                 }
-                resultLine += line[line.size - 1]
+                resultLine.append(line[line.size - 1])
                 writer.write("$resultLine\n")
             }
         }

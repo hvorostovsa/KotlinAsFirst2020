@@ -408,7 +408,6 @@ fun fromRoman(roman: String): Int {
  * IllegalArgumentException должен бросаться даже если ошибочная команда не была достигнута в ходе выполнения.
  *
  */
-// Я знаю, что не работает. Я не могу найти ошибку
 fun computeDeviceCells(cells: Int, commands: String, limit: Int): List<Int> {
     val goodChars = "><+-[] ".toSet()
 
@@ -433,12 +432,12 @@ fun computeDeviceCells(cells: Int, commands: String, limit: Int): List<Int> {
     var index = cells / 2
     var limitLast = limit
 
-    fun findNextClosingBracketIndex(startIndex: Int): Int {
+    fun findNextClosingBracketIndex(startIndex: Int, commandsLine: String): Int {
         // "[[][]]" -> 5
         var counter = 0
-        for (i in startIndex until commands.length) {
-            if (commands[i] in "[]") {
-                if (commands[i] == '[') counter++
+        for (i in startIndex until commandsLine.length) {
+            if (commandsLine[i] in "[]") {
+                if (commandsLine[i] == '[') counter++
                 else if (--counter == 0) return i
             }
         }
@@ -446,10 +445,14 @@ fun computeDeviceCells(cells: Int, commands: String, limit: Int): List<Int> {
     }
 
     fun executeCommandLine(commandsLine: String) {
+//        print(commandsLine)
+//        print(" ")
+//        println(cellsList)
         var commandIndex = 0
         while (commandIndex < commandsLine.length) {
             val c = commandsLine[commandIndex]
             if (--limitLast < 0) break
+//            println(limitLast)
             when (c) {
                 ' ' -> Unit // do nothing
                 '>' -> if (++index >= cells) throw passEdgeException
@@ -457,14 +460,16 @@ fun computeDeviceCells(cells: Int, commands: String, limit: Int): List<Int> {
                 '+' -> cellsList[index]++
                 '-' -> cellsList[index]--
                 '[' -> {
-                    if (cellsList[index] == 0) commandIndex = findNextClosingBracketIndex(commandIndex)
-                    else {
+                    if (cellsList[index] == 0) {
+                        commandIndex = findNextClosingBracketIndex(commandIndex, commandsLine) + 1
+                    } else {
                         val start = commandIndex + 1
-                        val end = findNextClosingBracketIndex(commandIndex)
+                        val end = findNextClosingBracketIndex(commandIndex, commandsLine)
                         val commandLineNow = commandsLine.substring(start, end)
                         do {
                             executeCommandLine(commandLineNow)
-                        } while (cellsList[index] != 0)
+                            limitLast--
+                        } while (cellsList[index] != 0 && limitLast > -1)
                         commandIndex--
                     }
                 }
