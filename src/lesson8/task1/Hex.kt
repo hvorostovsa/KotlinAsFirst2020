@@ -274,10 +274,8 @@ fun hexagonByThreePoints(a: HexPoint, b: HexPoint, c: HexPoint): Hexagon? {
     val minRadius = max(1, maxRadius / 2)
 
     for (radius in minRadius..maxRadius) {
-        val goodPoints = getAllPointsInDistance(a, radius)
-            .intersect(getAllPointsInDistance(b, radius))
-            .intersect(getAllPointsInDistance(c, radius))
-        if (goodPoints.isNotEmpty()) return Hexagon(goodPoints.first(), radius)
+        val center = getCenter(a, b, c, radius)
+        if (center != null) return Hexagon(center, radius)
     }
 
     return null
@@ -296,6 +294,22 @@ fun getAllPointsInDistance(center: HexPoint, distance: Int): Set<HexPoint> {
         direction = direction.next()
     }
     return set
+}
+
+fun getCenter(a: HexPoint, b: HexPoint, c: HexPoint, radius: Int): HexPoint? {
+    val points = getAllPointsInDistance(a, radius)
+    var pointNow = HexPoint(b.x, b.y + radius)
+    var direction = Direction.LEFT
+    for (i in 0 until 6) {
+        for (ii in 0 until radius) {
+            if (pointNow in points && pointNow.distance(c) == radius) {
+                return pointNow
+            }
+            pointNow = pointNow.move(direction, 1)
+        }
+        direction = direction.next()
+    }
+    return null
 }
 
 /**
