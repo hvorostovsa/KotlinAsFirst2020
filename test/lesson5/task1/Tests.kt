@@ -232,6 +232,7 @@ class Tests {
     @Test
     @Tag("3")
     fun canBuildFrom() {
+        assertTrue(canBuildFrom(listOf('a'), "A"))
         assertFalse(canBuildFrom(emptyList(), "foo"))
         assertTrue(canBuildFrom(listOf('a', 'b', 'o'), "baobab"))
         assertFalse(canBuildFrom(listOf('a', 'm', 'r'), "Marat"))
@@ -304,6 +305,10 @@ class Tests {
     @Test
     @Tag("6")
     fun findSumOfTwo() {
+        assertEquals(
+            Pair(0, 1),
+            findSumOfTwo(listOf(0, 0), 0)
+        )
         assertEquals(
             Pair(-1, -1),
             findSumOfTwo(emptyList(), 1)
