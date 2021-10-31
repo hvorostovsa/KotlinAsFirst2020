@@ -316,21 +316,33 @@ fun hasAnagrams(words: List<String>): Boolean = TODO()
  *          "GoodGnome" to setOf()
  *        )
  */
-fun friendsOfFriend(friend: String, friends: Map<String, Set<String>>): Set<String> {
-    val result = mutableSetOf<String>()
-    for ((name, set) in friends) {
-        if (friend == name)
-            for (person in set) {
-                result += person + friendsOfFriend(person, friends)
+fun friendsOfFriend(
+    friend: String,
+    friends: Map<String, Set<String>>,
+    set: MutableSet<String> = mutableSetOf()
+): MutableSet<String> {
+    for ((name, value) in friends) {
+        if ((friend == name))
+            for (person in value) {
+                if (!set.contains(person)) {
+                    set += name
+                    set += person
+                    set += friendsOfFriend(person, friends, set)
+                }
             }
     }
-    return result
+    return set
 }
 
 fun propagateHandshakes(friends: Map<String, Set<String>>): Map<String, Set<String>> {
     val result = mutableMapOf<String, Set<String>>()
     for ((name, set) in friends) {
-        result[name] = result.getOrDefault(name, setOf()) + friendsOfFriend(name, friends)
+        val listOfFriends = friendsOfFriend(name, friends)
+        listOfFriends.remove(name)
+        result[name] = result.getOrDefault(name, setOf()) + listOfFriends
+        for (person in set) {
+            if (!friends.contains(person)) result[person] = setOf()
+        }
     }
     return result
 }
@@ -352,7 +364,18 @@ fun propagateHandshakes(friends: Map<String, Set<String>>): Map<String, Set<Stri
  *   findSumOfTwo(listOf(1, 2, 3), 4) -> Pair(0, 2)
  *   findSumOfTwo(listOf(1, 2, 3), 6) -> Pair(-1, -1)
  */
-fun findSumOfTwo(list: List<Int>, number: Int): Pair<Int, Int> = TODO()
+fun findSumOfTwo(list: List<Int>, number: Int): Pair<Int, Int> {
+    val set = list.toMutableSet()
+    for (i in 0 until list.size) {
+        if ((number - list[i] in set) && (i != list.indexOf(number - list[i])))
+            return Pair(i, list.indexOf(number - list[i]))
+        else {
+            set.remove(number - list[i])
+            set.remove(list[i])
+        }
+    }
+    return Pair(-1, -1)
+}
 
 /**
  * Очень сложная (8 баллов)
