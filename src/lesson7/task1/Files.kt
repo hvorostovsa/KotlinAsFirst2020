@@ -395,18 +395,21 @@ Suspendisse ~~et elit in enim tempus iaculis~~.
  * (Отступы и переносы строк в примере добавлены для наглядности, при решении задачи их реализовывать не обязательно)
  */
 fun markdownToHtmlSimple(inputName: String, outputName: String) {
+    var stack = 0
     File(outputName).bufferedWriter().use { writer ->
         writer.write("<html><body>")
         File(inputName).readText().trim().split(Regex("\r?\n\r?\n")).forEach { paragraph ->
-            writer.write("<p>${markdownParagraph(paragraph)}</p>")
+            val pair = markdownParagraph(paragraph, stack)
+            stack = pair.second
+            writer.write("<p>${pair.first}</p>")
         }
         writer.write("</body></html>")
     }
 }
 
-fun markdownParagraph(paragraph: String): String {
+fun markdownParagraph(paragraph: String, startStack: Int = 0): Pair<String, Int> {
     val result = StringBuilder()
-    var stack = 0
+    var stack = startStack
     var strikethroughOpened = false
     var cursiveLast = false
     var i = 0
@@ -460,7 +463,7 @@ fun markdownParagraph(paragraph: String): String {
         }
         i++ // next iteration index
     }
-    return result.toString()
+    return Pair(result.toString(), stack)
 }
 
 /**
@@ -624,12 +627,17 @@ fun listParagraph(paragraph: String): String {
  *
  */
 fun markdownToHtml(inputName: String, outputName: String) {
+    var stack = 0
     File(outputName).bufferedWriter().use { writer ->
         writer.write("<html><body>")
         File(inputName).readText().trim().split(Regex("\r?\n\r?\n")).forEach { paragraph ->
-            if (paragraph.contains(Regex("^ *\\* |^ *\\d+. "))) {
-                writer.write("<p>${markdownParagraph(listParagraph(paragraph))}</p>")
-            } else writer.write("<p>${markdownParagraph(paragraph)}</p>")
+            val pair = if (paragraph.contains(Regex("^ *\\* |^ *\\d+. "))) {
+                markdownParagraph(listParagraph(paragraph), stack)
+            } else {
+                markdownParagraph(paragraph, stack)
+            }
+            stack = pair.second
+            writer.write("<p>${pair.first}</p>")
         }
         writer.write("</body></html>")
     }

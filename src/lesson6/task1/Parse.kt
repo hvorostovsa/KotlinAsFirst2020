@@ -459,7 +459,7 @@ fun computeDeviceCells(cells: Int, commands: String, limit: Int): List<Int> {
                 '[' -> {
                     if (cellsList[index] == 0) {
                         commandIndex = findNextClosingBracketIndex(commandIndex, commandsLine)
-                        limitLast++
+//                        limitLast++
                     } else {
                         val start = commandIndex + 1
                         val end = findNextClosingBracketIndex(commandIndex, commandsLine)
@@ -468,6 +468,7 @@ fun computeDeviceCells(cells: Int, commands: String, limit: Int): List<Int> {
                             executeCommandLine(commandLineNow)
                             limitLast--
                         } while (cellsList[index] != 0 && limitLast > -1)
+                        limitLast++
                         commandIndex--
                     }
                 }
@@ -477,5 +478,6 @@ fun computeDeviceCells(cells: Int, commands: String, limit: Int): List<Int> {
     }
 
     executeCommandLine(commands)
+//    println(limitLast)
     return cellsList
 }
