@@ -173,7 +173,7 @@ fun flattenPhoneNumber(phone: String): String {
     var flattenPhone = phone.replace(" ", "")
 
     // if incorrect prefix
-    if (flattenPhone.startsWith("+") && !flattenPhone[1].isDigit()) return ""
+    if (flattenPhone.startsWith("+") && (flattenPhone.length < 2 || !flattenPhone[1].isDigit())) return ""
 
     val openBracket = flattenPhone.indexOf("(")
     val closeBracket = flattenPhone.indexOf(")")
@@ -445,9 +445,6 @@ fun computeDeviceCells(cells: Int, commands: String, limit: Int): List<Int> {
     }
 
     fun executeCommandLine(commandsLine: String) {
-//        print(commandsLine)
-//        print(" ")
-//        println(cellsList)
         var commandIndex = 0
         while (commandIndex < commandsLine.length) {
             val c = commandsLine[commandIndex]
@@ -461,7 +458,8 @@ fun computeDeviceCells(cells: Int, commands: String, limit: Int): List<Int> {
                 '-' -> cellsList[index]--
                 '[' -> {
                     if (cellsList[index] == 0) {
-                        commandIndex = findNextClosingBracketIndex(commandIndex, commandsLine) + 1
+                        commandIndex = findNextClosingBracketIndex(commandIndex, commandsLine)
+                        limitLast++
                     } else {
                         val start = commandIndex + 1
                         val end = findNextClosingBracketIndex(commandIndex, commandsLine)

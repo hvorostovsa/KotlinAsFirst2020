@@ -227,6 +227,8 @@ fun HexPoint.move(direction: Direction, distance: Int): HexPoint {
  *     )
  */
 fun pathBetweenHexes(from: HexPoint, to: HexPoint): List<HexPoint> {
+    if (from == to) return mutableListOf(from)
+
     val trajectoryX = if (from.x <= to.x) 1 else -1
     val trajectoryY = if (from.y <= to.y) 1 else -1
     val list = mutableListOf(from)
