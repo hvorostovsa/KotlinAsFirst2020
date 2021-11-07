@@ -4,6 +4,9 @@ package lesson9.task2
 
 import lesson9.task1.Matrix
 import lesson9.task1.createMatrix
+import kotlin.IllegalArgumentException
+import kotlin.math.ceil
+import kotlin.math.min
 
 // Все задачи в этом файле требуют наличия реализации интерфейса "Матрица" в Matrix.kt
 
@@ -62,8 +65,27 @@ operator fun Matrix<Int>.plus(other: Matrix<Int>): Matrix<Int> {
  */
 fun generateSpiral(height: Int, width: Int): Matrix<Int> {
     val matrix = createMatrix(height, width, 0)
-    var step = 1
-    TODO()
+    var step = 0
+    val value = ceil(min(height, width).toDouble() / 2).toInt() - 1
+    val size = height * width
+
+    for (i in 0 until value) {
+        for (col in i until width - i) matrix[i, col] = ++step
+        for (row in i + 1 until height - i) matrix[row, width - i - 1] = ++step
+        for (col in width - i - 2 downTo i) matrix[height - i - 1, col] = ++step
+        for (row in height - i - 2 downTo i + 1) matrix[row, i] = ++step
+    }
+
+    if (step == size) return matrix
+    for (col in value until width - value) matrix[value, col] = ++step
+    if (step == size) return matrix
+    for (row in value + 1 until height - value) matrix[row, width - value - 1] = ++step
+    if (step == size) return matrix
+    for (col in width - value - 2 downTo value) matrix[height - value - 1, col] = ++step
+    if (step == size) return matrix
+    for (row in height - value - 2 downTo value + 1) matrix[row, value] = ++step
+
+    return matrix
 }
 
 /**
@@ -80,7 +102,15 @@ fun generateSpiral(height: Int, width: Int): Matrix<Int> {
  *  1  2  2  2  2  1
  *  1  1  1  1  1  1
  */
-fun generateRectangles(height: Int, width: Int): Matrix<Int> = TODO()
+fun generateRectangles(height: Int, width: Int): Matrix<Int> {
+    val matrix = createMatrix(height, width, 0)
+    for (row in 0 until height) {
+        for (col in 0 until width) {
+            matrix[row, col] = min(min(row, height - row - 1), min(col, width - col - 1)) + 1
+        }
+    }
+    return matrix
+}
 
 /**
  * Сложная (5 баллов)
@@ -108,7 +138,17 @@ fun generateSnake(height: Int, width: Int): Matrix<Int> = TODO()
  * 4 5 6      8 5 2
  * 7 8 9      9 6 3
  */
-fun <E> rotate(matrix: Matrix<E>): Matrix<E> = TODO()
+fun <E> rotate(matrix: Matrix<E>): Matrix<E> {
+    if (matrix.width != matrix.height) throw IllegalArgumentException("Height must be equal to width")
+    if (matrix.width < 1 || matrix.height < 1) return matrix
+    val result = createMatrix(height = matrix.width, width = matrix.height, e = matrix[0, 0])
+    for (i in 0 until matrix.width) {
+        for (j in 0 until matrix.height) {
+            result[i, j] = matrix[matrix.width - j - 1, i]
+        }
+    }
+    return result
+}
 
 /**
  * Сложная (5 баллов)
@@ -123,7 +163,48 @@ fun <E> rotate(matrix: Matrix<E>): Matrix<E> = TODO()
  * 1 2 3
  * 3 1 2
  */
-fun isLatinSquare(matrix: Matrix<Int>): Boolean = TODO()
+fun isLatinSquare(matrix: Matrix<Int>): Boolean {
+    if (matrix.height != matrix.width) return false
+    val n = matrix.height
+
+    fun validCell(number: Int): Boolean = (1 <= number) && (number <= n)
+
+    var sum = 0
+    for (col in 0 until matrix.width) {
+        if (!validCell(matrix[0, col])) return false
+        sum += matrix[0, col]
+    }
+    val controlSum = sum
+
+    // Check all the rows
+    for (row in 1 until matrix.height) {
+        sum = 0
+        for (col in 0 until matrix.width) {
+            if (!validCell(matrix[row, col])) return false // In the same time checking that all the cells is valid
+            sum += matrix[row, col]
+        }
+        if (sum != controlSum) return false
+    }
+
+    // Check all the columns
+    for (col in 0 until matrix.width) {
+        sum = 0
+        for (row in 0 until matrix.height) sum += matrix[row, col]
+        if (sum != controlSum) return false
+    }
+
+//    // Check main diagonal
+//    sum = 0
+//    for (k in 0 until n) sum += matrix[k, k]
+//    if (sum != controlSum) return false
+//
+//    // Check secondary diagonal
+//    sum = 0
+//    for (k in 0 until n) sum += matrix[k, n - k - 1]
+//    if (sum != controlSum) return false
+
+    return true
+}
 
 /**
  * Средняя (3 балла)
@@ -142,7 +223,26 @@ fun isLatinSquare(matrix: Matrix<Int>): Boolean = TODO()
  *
  * 42 ===> 0
  */
-fun sumNeighbours(matrix: Matrix<Int>): Matrix<Int> = TODO()
+fun sumNeighbours(matrix: Matrix<Int>): Matrix<Int> {
+    val result = createMatrix(matrix.height, matrix.width, 0)
+
+    val combinations = mutableSetOf<Pair<Int, Int>>()
+    for (i in -1..1) {
+        for (j in -1..1) if (i != 0 || j != 0) combinations.add(i to j)
+    }
+
+    for (row in 0 until matrix.height) {
+        for (col in 0 until matrix.width) {
+            for ((rowModifier, colModifier) in combinations) {
+                val newRow = row + rowModifier
+                val newCol = col + colModifier
+                if (matrix.isValidIndex(newRow, newCol)) result[row, col] += matrix[newRow, newCol]
+            }
+        }
+    }
+
+    return result
+}
 
 /**
  * Средняя (4 балла)
@@ -159,7 +259,24 @@ fun sumNeighbours(matrix: Matrix<Int>): Matrix<Int> = TODO()
  * 0 0 1 0
  * 0 0 0 0
  */
-fun findHoles(matrix: Matrix<Int>): Holes = TODO()
+fun findHoles(matrix: Matrix<Int>): Holes {
+    val badRows = mutableSetOf<Int>()
+    val badCols = mutableSetOf<Int>()
+
+    for (row in 0 until matrix.height) {
+        for (col in 0 until matrix.width) {
+            if (matrix[row, col] == 1) {
+                badRows.add(row)
+                badCols.add(col)
+            }
+        }
+    }
+
+    return Holes(
+        rows = List(matrix.height) { it }.filter { it !in badRows },
+        columns = List(matrix.width) { it }.filter { it !in badCols },
+    )
+}
 
 /**
  * Класс для описания местонахождения "дырок" в матрице
@@ -180,7 +297,27 @@ data class Holes(val rows: List<Int>, val columns: List<Int>)
  *
  * К примеру, центральный элемент 12 = 1 + 2 + 4 + 5, элемент в левом нижнем углу 12 = 1 + 4 + 7 и так далее.
  */
-fun sumSubMatrix(matrix: Matrix<Int>): Matrix<Int> = TODO()
+fun sumSubMatrix(matrix: Matrix<Int>): Matrix<Int> {
+    fun calculateSubMatrixSum(toRow: Int, toColumn: Int): Int {
+        // toRow, toColumn включительно
+        var sum = 0
+        for (row in 0..toRow) {
+            for (col in 0..toColumn) sum += matrix[row, col]
+        }
+        return sum
+    }
+
+    val result = createMatrix(matrix.height, matrix.width, 0)
+
+    for (row in 0 until matrix.height) {
+        for (col in 0 until matrix.width) {
+            result[row, col] = calculateSubMatrixSum(row, col)
+        }
+    }
+
+    return result
+
+}
 
 /**
  * Простая (2 балла)
@@ -188,7 +325,14 @@ fun sumSubMatrix(matrix: Matrix<Int>): Matrix<Int> = TODO()
  * Инвертировать заданную матрицу.
  * При инвертировании знак каждого элемента матрицы следует заменить на обратный
  */
-operator fun Matrix<Int>.unaryMinus(): Matrix<Int> = TODO(this.toString())
+operator fun Matrix<Int>.unaryMinus(): Matrix<Int> {
+    for (row in 0 until this.height) {
+        for (col in 0 until this.width) {
+            this[row, col] *= -1
+        }
+    }
+    return this
+}
 
 /**
  * Средняя (4 балла)
@@ -198,7 +342,24 @@ operator fun Matrix<Int>.unaryMinus(): Matrix<Int> = TODO(this.toString())
  * В противном случае бросить IllegalArgumentException.
  * Подробно про порядок умножения см. статью Википедии "Умножение матриц".
  */
-operator fun Matrix<Int>.times(other: Matrix<Int>): Matrix<Int> = TODO(this.toString())
+operator fun Matrix<Int>.times(other: Matrix<Int>): Matrix<Int> {
+    if (this.width != other.height)
+        throw IllegalArgumentException("Width of the first matrix must be equal to height of the second matrix")
+
+    val result = createMatrix(this.height, other.width, 0)
+
+    for (row in 0 until result.height) {
+        for (col in 0 until result.width) {
+            var sum = 0
+            for (k in 0 until this.width) {
+                sum += this[row, k] * other[k, col]
+            }
+            result[row, col] = sum
+        }
+    }
+
+    return result
+}
 
 /**
  * Сложная (7 баллов)
@@ -220,7 +381,25 @@ operator fun Matrix<Int>.times(other: Matrix<Int>): Matrix<Int> = TODO(this.toSt
  * Вернуть тройку (Triple) -- (да/нет, требуемый сдвиг по высоте, требуемый сдвиг по ширине).
  * Если наложение невозможно, то первый элемент тройки "нет" и сдвиги могут быть любыми.
  */
-fun canOpenLock(key: Matrix<Int>, lock: Matrix<Int>): Triple<Boolean, Int, Int> = TODO()
+fun canOpenLock(key: Matrix<Int>, lock: Matrix<Int>): Triple<Boolean, Int, Int> {
+    if (key.width > lock.width || key.height > lock.height) return Triple(false, -1, -1)
+
+    fun isKeyFits(offsetRow: Int, offsetCol: Int): Boolean {
+        for (row in 0 until key.height) {
+            for (col in 0 until key.width)
+                if (key[row, col] == lock[row + offsetRow, col + offsetCol]) return false
+        }
+        return true
+    }
+
+    for (offsetRow in 0..lock.height - key.height) {
+        for (offsetCol in 0..lock.width - key.width) {
+            if (isKeyFits(offsetRow, offsetCol)) return Triple(true, offsetRow, offsetCol)
+        }
+    }
+
+    return Triple(false, -1, -1)
+}
 
 /**
  * Сложная (8 баллов)
@@ -249,7 +428,59 @@ fun canOpenLock(key: Matrix<Int>, lock: Matrix<Int>): Triple<Boolean, Int, Int> 
  * 0  4 13  6
  * 3 10 11  8
  */
-fun fifteenGameMoves(matrix: Matrix<Int>, moves: List<Int>): Matrix<Int> = TODO()
+fun fifteenGameMoves(matrix: Matrix<Int>, moves: List<Int>): Matrix<Int> {
+    val size = 4
+    val gameName = 15
+
+//    // check if matrix is correct
+//    if (matrix.width != size || matrix.height != size) // if incorrect size
+//        throw IllegalStateException("Incorrect size of the matrix")
+//    val numbersSet = mutableSetOf<Int>()
+//    for (row in 0 until matrix.height) {
+//        for (col in 0 until matrix.width) {
+//            if (matrix[row, col] < 0 || matrix[row, col] > gameName) // if incorrect number in matrix
+//                throw IllegalStateException("Incorrect numbers")
+//            if (matrix[row, col] in numbersSet) // if some numbers were duplicated
+//                throw IllegalStateException("Several identical numbers")
+//        }
+//    }
+
+    // check if moves is correct
+    for (move in moves) if (move !in 1..15) throw IllegalStateException("Incorrect moves")
+
+    // find zero position
+    var zeroPos = Pair(-1, -1)
+    for (row in 0 until matrix.height) {
+        for (col in 0 until matrix.width) {
+            if (matrix[row, col] == 0) {
+                zeroPos = Pair(row, col)
+                break
+            }
+        }
+        if (zeroPos.first != -1) break
+    }
+
+    // make moves
+    val offsets = setOf(Pair(1, 0), Pair(-1, 0), Pair(0, 1), Pair(0, -1))
+    var moveMade: Boolean
+    for (move in moves) {
+        moveMade = false
+        for (offset in offsets) {
+            val newRow = zeroPos.first + offset.first
+            val newCol = zeroPos.second + offset.second
+            if (!matrix.isValidIndex(newRow, newCol)) continue
+            if (matrix[newRow, newCol] != move) continue
+            matrix[zeroPos.first, zeroPos.second] = move
+            matrix[newRow, newCol] = 0
+            zeroPos = Pair(newRow, newCol)
+            moveMade = true
+            break
+        }
+        if (!moveMade) throw IllegalStateException("Unreachable moves")
+    }
+
+    return matrix
+}
 
 /**
  * Очень сложная (32 балла)

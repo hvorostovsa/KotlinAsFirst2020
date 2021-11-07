@@ -37,6 +37,10 @@ interface Matrix<E> {
     operator fun set(row: Int, column: Int, value: E)
 
     operator fun set(cell: Cell, value: E)
+
+    fun isValidIndex(row: Int, col: Int): Boolean
+
+    fun isValidIndex(cell: Cell): Boolean
 }
 
 /**
@@ -73,12 +77,25 @@ class MatrixImpl<E>(override val height: Int, override val width: Int, e: E) : M
 
     override fun equals(other: Any?) = other is MatrixImpl<*> && other.list == list
 
-    override fun toString(): String = list.toString()
+    override fun toString(): String {
+        val result = StringBuilder()
+        for (row in 0 until height - 1) {
+            result.append(list.subList(row * width, (row + 1) * width).joinToString(" \t"), "\n")
+        }
+        result.append(list.subList((height - 1) * width, height * width).joinToString(" \t"))
+        return result.toString()
+    }
 
     override fun hashCode(): Int {
         var result = height
         result = 31 * result + width
         return result
     }
+
+    override fun isValidIndex(row: Int, col: Int): Boolean =
+        (0 <= row) && (row < height) && (0 <= col) && (col < width)
+
+    override fun isValidIndex(cell: Cell): Boolean =
+        isValidIndex(cell.row, cell.column)
 }
 
