@@ -37,10 +37,6 @@ interface Matrix<E> {
     operator fun set(row: Int, column: Int, value: E)
 
     operator fun set(cell: Cell, value: E)
-
-    fun isValidIndex(row: Int, col: Int): Boolean
-
-    fun isValidIndex(cell: Cell): Boolean
 }
 
 /**
@@ -91,11 +87,5 @@ class MatrixImpl<E>(override val height: Int, override val width: Int, e: E) : M
         result = 31 * result + width
         return result
     }
-
-    override fun isValidIndex(row: Int, col: Int): Boolean =
-        (0 <= row) && (row < height) && (0 <= col) && (col < width)
-
-    override fun isValidIndex(cell: Cell): Boolean =
-        isValidIndex(cell.row, cell.column)
 }
 

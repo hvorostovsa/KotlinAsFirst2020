@@ -2,7 +2,9 @@
 
 package lesson9.task2
 
+import lesson9.task1.Cell
 import lesson9.task1.Matrix
+import lesson9.task1.MatrixImpl
 import lesson9.task1.createMatrix
 import kotlin.IllegalArgumentException
 import kotlin.math.ceil
@@ -150,6 +152,11 @@ fun <E> rotate(matrix: Matrix<E>): Matrix<E> {
     return result
 }
 
+fun <E> Matrix<E>.isValidIndex(row: Int, column: Int): Boolean =
+    (0 <= row) && (row < this.height) && (0 <= column) && (column < this.width)
+
+fun <E> Matrix<E>.isValidIndex(cell: Cell) = this.isValidIndex(cell.row, cell.column)
+
 /**
  * Сложная (5 баллов)
  *
@@ -243,6 +250,7 @@ fun sumNeighbours(matrix: Matrix<Int>): Matrix<Int> {
 
     return result
 }
+
 
 /**
  * Средняя (4 балла)
