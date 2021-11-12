@@ -2,6 +2,8 @@
 
 package lesson6.task1
 
+import java.lang.IllegalArgumentException
+
 // Урок 6: разбор строк, исключения
 // Максимальное количество баллов = 13
 // Рекомендуемое количество баллов = 11
@@ -114,7 +116,21 @@ fun flattenPhoneNumber(phone: String): String = TODO()
  * Прочитать строку и вернуть максимальное присутствующее в ней число (717 в примере).
  * При нарушении формата входной строки или при отсутствии в ней чисел, вернуть -1.
  */
-fun bestLongJump(jumps: String): Int = TODO()
+fun bestLongJump(jumps: String): Int {
+    val set = jumps.split(" ").toMutableSet()
+    var max = 0
+    if ("-" in set) set.remove("-")
+    if ("%" in set) set.remove("%")
+    if (set.isEmpty()) return -1
+    return try {
+        for (element in set) {
+            if (element.toInt() > max) max = element.toInt()
+        }
+        max
+    } catch (e: NumberFormatException) {
+        -1
+    }
+}
 
 /**
  * Сложная (6 баллов)
@@ -127,7 +143,19 @@ fun bestLongJump(jumps: String): Int = TODO()
  * При нарушении формата входной строки, а также в случае отсутствия удачных попыток,
  * вернуть -1.
  */
-fun bestHighJump(jumps: String): Int = TODO()
+fun bestHighJump(jumps: String): Int {
+    var max = 0
+    if (!jumps.matches(Regex("(\\d+\\s[ +%-]+)+"))) return -1
+    val list = jumps.split(" ")
+    for (i in 0 until list.size) {
+        if (list[i].matches(Regex("""\d+""")) &&
+            list[i + 1].contains("+")
+        )
+            if (list[i].toInt() > max) max = list[i].toInt()
+    }
+    return max
+}
+
 
 /**
  * Сложная (6 баллов)
@@ -138,7 +166,16 @@ fun bestHighJump(jumps: String): Int = TODO()
  * Вернуть значение выражения (6 для примера).
  * Про нарушении формата входной строки бросить исключение IllegalArgumentException
  */
-fun plusMinus(expression: String): Int = TODO()
+fun plusMinus(expression: String): Int {
+    if (!expression.matches(Regex("""(\d+\s[+-]\s)*\d+"""))) throw IllegalArgumentException()
+    val list = expression.split(" ")
+    var result = list[0].toInt()
+    for (i in 2 until list.size step 2) {
+        if (list[i - 1] == "+") result += list[i].toInt()
+        else if (list[i - 1] == "-") result -= list[i].toInt()
+    }
+    return result
+}
 
 /**
  * Сложная (6 баллов)

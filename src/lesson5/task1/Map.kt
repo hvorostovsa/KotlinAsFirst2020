@@ -223,11 +223,14 @@ fun averageStockPrice(stockPrices: List<Pair<String, Double>>): Map<String, Doub
  *   ) -> "Мария"
  */
 fun findCheapestStuff(stuff: Map<String, Pair<String, Double>>, kind: String): String? {
-    val list = stuff.values.toList().map { it.second }
-    for ((name, pair) in stuff) {
-        if (kind == pair.first && pair.second == list.minOf { it }) return name
-    }
-    return null
+    var result: String? = null
+    var minPrice = 0.0
+    for ((name, pair) in stuff)
+        if ((pair.first == kind) && ((minPrice == 0.0) || (pair.second < minPrice))) {
+            minPrice = pair.second
+            result = name
+        }
+    return result
 }
 
 
@@ -322,15 +325,14 @@ fun friendsOfFriend(
     friends: Map<String, Set<String>>,
     set: MutableSet<String> = mutableSetOf()
 ): MutableSet<String> {
-    for ((name, value) in friends) {
-        if ((friend == name))
-            for (person in value) {
-                if (!set.contains(person)) {
-                    set += name
-                    set += person
-                    set += friendsOfFriend(person, friends, set)
-                }
+    if (friends[friend] != null) {
+        for (person in friends[friend]!!) {
+            if (person !in set) {
+                set += friend
+                set += person
+                set += friendsOfFriend(person, friends, set)
             }
+        }
     }
     return set
 }
