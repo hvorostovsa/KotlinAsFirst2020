@@ -396,21 +396,24 @@ Suspendisse ~~et elit in enim tempus iaculis~~.
  */
 fun markdownToHtmlSimple(inputName: String, outputName: String) {
     var stack = 0
+    var isStrikethrough = false
     File(outputName).bufferedWriter().use { writer ->
         writer.write("<html><body>")
         File(inputName).readText().trim().split(Regex("\r?\n\r?\n")).forEach { paragraph ->
-            val pair = markdownParagraph(paragraph, stack)
-            stack = pair.second
-            writer.write("<p>${pair.first}</p>")
+            val triple = markdownParagraph(paragraph, stack, isStrikethrough)
+            stack = triple.second
+            isStrikethrough = triple.third
+            writer.write("<p>${triple.first}</p>")
         }
         writer.write("</body></html>")
     }
 }
 
-fun markdownParagraph(paragraph: String, startStack: Int = 0): Pair<String, Int> {
+fun markdownParagraph(paragraph: String, startStack: Int = 0, isStrikethrough: Boolean = false):
+        Triple<String, Int, Boolean> {
     val result = StringBuilder()
     var stack = startStack
-    var strikethroughOpened = false
+    var strikethroughOpened = isStrikethrough
     var cursiveLast = false
     var i = 0
 
@@ -463,7 +466,7 @@ fun markdownParagraph(paragraph: String, startStack: Int = 0): Pair<String, Int>
         }
         i++ // next iteration index
     }
-    return Pair(result.toString(), stack)
+    return Triple(result.toString(), stack, strikethroughOpened)
 }
 
 /**
@@ -628,16 +631,18 @@ fun listParagraph(paragraph: String): String {
  */
 fun markdownToHtml(inputName: String, outputName: String) {
     var stack = 0
+    var isStrikethrough = false
     File(outputName).bufferedWriter().use { writer ->
         writer.write("<html><body>")
         File(inputName).readText().trim().split(Regex("\r?\n\r?\n")).forEach { paragraph ->
-            val pair = if (paragraph.contains(Regex("^ *\\* |^ *\\d+. "))) {
-                markdownParagraph(listParagraph(paragraph), stack)
+            val triple = if (paragraph.contains(Regex("^ *\\* |^ *\\d+. "))) {
+                markdownParagraph(listParagraph(paragraph), stack, isStrikethrough)
             } else {
-                markdownParagraph(paragraph, stack)
+                markdownParagraph(paragraph, stack, isStrikethrough)
             }
-            stack = pair.second
-            writer.write("<p>${pair.first}</p>")
+            stack = triple.second
+            isStrikethrough = triple.third
+            writer.write("<p>${triple.first}</p>")
         }
         writer.write("</body></html>")
     }

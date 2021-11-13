@@ -8,6 +8,7 @@ import lesson9.task1.MatrixImpl
 import lesson9.task1.createMatrix
 import kotlin.IllegalArgumentException
 import kotlin.math.ceil
+import kotlin.math.max
 import kotlin.math.min
 
 // Все задачи в этом файле требуют наличия реализации интерфейса "Матрица" в Matrix.kt
@@ -127,7 +128,20 @@ fun generateRectangles(height: Int, width: Int): Matrix<Int> {
  * 10 13 16 18
  * 14 17 19 20
  */
-fun generateSnake(height: Int, width: Int): Matrix<Int> = TODO()
+fun generateSnake(height: Int, width: Int): Matrix<Int> {
+    val matrix = createMatrix(height, width, 0)
+
+    var step = 0
+    for (k in 0..height + width - 2) {
+        for (row in max(0, k - width + 1) until height) {
+            val col = k - row
+            if (col < 0) break
+            matrix[row, col] = ++step
+        }
+    }
+
+    return matrix
+}
 
 /**
  * Средняя (3 балла)
@@ -176,39 +190,26 @@ fun isLatinSquare(matrix: Matrix<Int>): Boolean {
 
     fun validCell(number: Int): Boolean = (1 <= number) && (number <= n)
 
-    var sum = 0
-    for (col in 0 until matrix.width) {
-        if (!validCell(matrix[0, col])) return false
-        sum += matrix[0, col]
-    }
-    val controlSum = sum
+    val set = mutableSetOf<Int>()
 
     // Check all the rows
-    for (row in 1 until matrix.height) {
-        sum = 0
+    for (row in 0 until matrix.height) {
+        set.clear()
         for (col in 0 until matrix.width) {
             if (!validCell(matrix[row, col])) return false // In the same time checking that all the cells is valid
-            sum += matrix[row, col]
+            if (matrix[row, col] in set) return false // If number duplicates
+            set.add(matrix[row, col])
         }
-        if (sum != controlSum) return false
     }
 
     // Check all the columns
     for (col in 0 until matrix.width) {
-        sum = 0
-        for (row in 0 until matrix.height) sum += matrix[row, col]
-        if (sum != controlSum) return false
+        set.clear()
+        for (row in 0 until matrix.height) {
+            if (matrix[row, col] in set) return false
+            set.add(matrix[row, col])
+        }
     }
-
-//    // Check main diagonal
-//    sum = 0
-//    for (k in 0 until n) sum += matrix[k, k]
-//    if (sum != controlSum) return false
-//
-//    // Check secondary diagonal
-//    sum = 0
-//    for (k in 0 until n) sum += matrix[k, n - k - 1]
-//    if (sum != controlSum) return false
 
     return true
 }
