@@ -63,7 +63,12 @@ fun alignFile(inputName: String, lineLength: Int, outputName: String) {
  * Подчёркивание в середине и/или в конце строк значения не имеет.
  */
 fun deleteMarked(inputName: String, outputName: String) {
-    TODO()
+    val result = File(outputName).bufferedWriter()
+    for (line in File(inputName).readLines()) {
+        if (line.isEmpty()) result.write("\n\n")
+        else if (line.first() != '_') result.write(line)
+    }
+    result.close()
 }
 
 /**
@@ -75,7 +80,28 @@ fun deleteMarked(inputName: String, outputName: String) {
  * Регистр букв игнорировать, то есть буквы е и Е считать одинаковыми.
  *
  */
-fun countSubstrings(inputName: String, substrings: List<String>): Map<String, Int> = TODO()
+fun countInLine(line: String, sub: String, k: Int): Int {
+    return if (!line.contains(sub)) k
+    else {
+        val new = k + 1
+        countInLine(line.substring(line.indexOf(sub) + 1), sub, new)
+    }
+}
+
+fun countSubstrings(inputName: String, substrings: List<String>): Map<String, Int> {
+    val map = mutableMapOf<String, Int>()
+    var count = 0
+    for (elem in substrings) {
+        for (line in File(inputName).readLines()) {
+            val lowerLine = line.toLowerCase()
+            val lowerElem = elem.toLowerCase()
+            count += countInLine(lowerLine, lowerElem, 0)
+        }
+        map[elem] = count
+        count = 0
+    }
+    return map
+}
 
 
 /**
@@ -92,7 +118,19 @@ fun countSubstrings(inputName: String, substrings: List<String>): Map<String, In
  *
  */
 fun sibilants(inputName: String, outputName: String) {
-    TODO()
+    val list = listOf('ж', 'Ж', 'ш', 'Ш', 'ч', 'Ч', 'щ', 'Щ')
+    val map = mapOf('ы' to 'и', 'Ы' to 'И', 'я' to 'а', 'Я' to 'А', 'ю' to 'у', 'Ю' to 'У')
+    val result = File(outputName).bufferedWriter()
+    for (line in File(inputName).readLines()) {
+        result.write(line[0].toString())
+        for (i in 1 until line.length) {
+            if (line[i - 1] in list && line[i] in map.keys)
+                result.write(map[line[i]].toString())
+            else result.write(line[i].toString())
+        }
+        result.newLine()
+    }
+    result.close()
 }
 
 /**
