@@ -233,7 +233,39 @@ fun mostExpensive(description: String): String {
  *
  * Вернуть -1, если roman не является корректным римским числом
  */
-fun fromRoman(roman: String): Int = TODO()
+fun fromRoman(roman: String): Int {
+    var number = 0
+    val list = roman.split("").toMutableList()
+    for (i in 1 until list.size - 1) {
+        val letter = list[i]
+        val last = list[i - 1]
+        val next = list[i + 1]
+
+        if (letter == "M" && last != "C") number += 1000
+        if (letter == "D" && last != "C") number += 500
+
+        if (letter == "C" && next == "M") number += 900
+        else if (letter == "C" && next == "D") number += 400
+        else if (letter == "C" && last != "X") number += 100
+
+        if (letter == "L" && last != "X") number += 50
+
+        if (letter == "X" && next == "C") number += 90
+        else if (letter == "X" && next == "L") number += 40
+        else if (letter == "X" && last != "I") number += 10
+
+        if (letter == "V" && last != "I") number += 5
+
+        if (letter == "I" && next == "X") number += 9
+        else if (letter == "I" && next == "V") number += 4
+        else if (letter == "I") number += 1
+
+    }
+    return if (number == 0) -1
+    else number
+}
+
+
 
 /**
  * Очень сложная (7 баллов)
