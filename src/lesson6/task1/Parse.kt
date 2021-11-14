@@ -212,9 +212,10 @@ fun mostExpensive(description: String): String {
     val prices = mutableListOf(0.0)
     val list = description.filter { it != ';' }.split(" ")
     try {
-        for (i in 0 until list.size - 1 step 2) {
-            map[list[i + 1].toDouble()] = list[i]
-            prices += list[i + 1].toDouble()
+        for (i in 1 until list.size step 2) {
+            val price = list[i].toDouble()
+            map[price] = list[i - 1]
+            prices += price
         }
     } catch (e: NumberFormatException) {
         return ""
@@ -264,7 +265,6 @@ fun fromRoman(roman: String): Int {
     }
     return number
 }
-
 
 
 /**
