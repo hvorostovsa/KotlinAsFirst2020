@@ -234,6 +234,7 @@ fun mostExpensive(description: String): String {
  * Вернуть -1, если roman не является корректным римским числом
  */
 fun fromRoman(roman: String): Int {
+    if (!roman.matches(Regex("""[IVXLCDM]+"""))) return -1
     var number = 0
     val list = roman.split("").toMutableList()
     for (i in 1 until list.size - 1) {
@@ -261,8 +262,7 @@ fun fromRoman(roman: String): Int {
         else if (letter == "I") number += 1
 
     }
-    return if (number == 0) -1
-    else number
+    return number
 }
 
 
