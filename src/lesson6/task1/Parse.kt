@@ -122,14 +122,12 @@ fun bestLongJump(jumps: String): Int {
     if ("-" in set) set.remove("-")
     if ("%" in set) set.remove("%")
     if (set.isEmpty()) return -1
-    return try {
-        for (element in set) {
-            if (element.toInt() > max) max = element.toInt()
-        }
-        max
-    } catch (e: NumberFormatException) {
-        -1
+    for (element in set) {
+        val number = element.toIntOrNull() ?: return -1
+        if (number > max)
+            max = number
     }
+    return max
 }
 
 /**
@@ -145,7 +143,7 @@ fun bestLongJump(jumps: String): Int {
  */
 fun bestHighJump(jumps: String): Int {
     var max = 0
-    if (!jumps.matches(Regex("(\\d+\\s[ +%-]+)+"))) return -1
+    if (!jumps.matches(Regex("""(\d+\s[+%-]+\s)*\d+\s[+%-]+"""))) return -1
     val list = jumps.split(" ")
     for (i in 0 until list.size) {
         if (list[i].matches(Regex("""\d+""")) &&
@@ -208,19 +206,17 @@ fun firstDuplicateIndex(str: String): Int {
  * Все цены должны быть больше нуля либо равны нулю.
  */
 fun mostExpensive(description: String): String {
+    if (!description.matches(Regex("""([а-яА-Яa-zA-Z]+\s\d+\.\d+;\s)*[а-яА-Яa-zA-Z]+\s\d+\.\d+""")))
+        return ""
     val map = mutableMapOf(0.0 to "")
     val prices = mutableListOf(0.0)
     val list = description.filter { it != ';' }.split(" ")
-    try {
-        for (i in 1 until list.size step 2) {
-            val price = list[i].toDouble()
-            map[price] = list[i - 1]
-            prices += price
-        }
-    } catch (e: NumberFormatException) {
-        return ""
+    for (i in 1 until list.size step 2) {
+        val price = list[i].toDouble()
+        map[price] = list[i - 1]
+        prices += price
     }
-    return map[prices.maxOrNull()]!!
+    return map[map.keys.maxOrNull()]!!
 }
 
 /**
@@ -242,26 +238,21 @@ fun fromRoman(roman: String): Int {
         val letter = list[i]
         val last = list[i - 1]
         val next = list[i + 1]
-
-        if (letter == "M" && last != "C") number += 1000
-        if (letter == "D" && last != "C") number += 500
-
-        if (letter == "C" && next == "M") number += 900
-        else if (letter == "C" && next == "D") number += 400
-        else if (letter == "C" && last != "X") number += 100
-
-        if (letter == "L" && last != "X") number += 50
-
-        if (letter == "X" && next == "C") number += 90
-        else if (letter == "X" && next == "L") number += 40
-        else if (letter == "X" && last != "I") number += 10
-
-        if (letter == "V" && last != "I") number += 5
-
-        if (letter == "I" && next == "X") number += 9
-        else if (letter == "I" && next == "V") number += 4
-        else if (letter == "I") number += 1
-
+        when {
+            letter == "M" && last != "C" -> number += 1000
+            letter == "D" && last != "C" -> number += 500
+            letter == "C" && next == "M" -> number += 900
+            letter == "C" && next == "D" -> number += 400
+            letter == "C" && last != "X" -> number += 100
+            letter == "L" && last != "X" -> number += 50
+            letter == "X" && next == "C" -> number += 90
+            letter == "X" && next == "L" -> number += 40
+            letter == "X" && last != "I" -> number += 10
+            letter == "V" && last != "I" -> number += 5
+            letter == "I" && next == "X" -> number += 9
+            letter == "I" && next == "V" -> number += 4
+            letter == "I" -> number += 1
+        }
     }
     return number
 }

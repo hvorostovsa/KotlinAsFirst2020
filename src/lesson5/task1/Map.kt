@@ -325,13 +325,12 @@ fun friendsOfFriend(
     friends: Map<String, Set<String>>,
     set: MutableSet<String> = mutableSetOf()
 ): MutableSet<String> {
-    if (friends[friend] != null) {
-        for (person in friends[friend]!!) {
-            if (person !in set) {
-                set += friend
-                set += person
-                set += friendsOfFriend(person, friends, set)
-            }
+    val name = friends[friend] ?: return set
+    for (person in name) {
+        if (person !in set) {
+            set += friend
+            set += person
+            set += friendsOfFriend(person, friends, set)
         }
     }
     return set
