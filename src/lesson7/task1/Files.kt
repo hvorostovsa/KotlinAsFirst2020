@@ -374,10 +374,15 @@ fun markdownToHtmlSimple(inputName: String, outputName: String) {
     val htmlFile = File(outputName).bufferedWriter()
     var stars = 0
     var dashes = 0
+    var paragraphs = 0
     var prevLine = ""
-    htmlFile.write("<html>\n<body>\n<p>\n")
+    htmlFile.write("<html>\n<body>\n")
     for (line in File(inputName).readLines()) {
         if (!line.matches(Regex("\\s*"))) {
+            if (paragraphs == 0) {
+                htmlFile.write("<p>\n")
+                paragraphs++
+            }
             val list = line.split("") + ""
             for (i in 1 until list.size - 1) {
                 val symbol = list[i]
@@ -436,11 +441,14 @@ fun markdownToHtmlSimple(inputName: String, outputName: String) {
                     }
                 }
             }
-        } else if (line.matches(Regex("\\s*")) && !prevLine.matches(Regex("\\s*")))
-            htmlFile.write("</p>\n<p>\n")
+        } else if (line.matches(Regex("\\s*")) && !prevLine.matches(Regex("\\s*"))) {
+            htmlFile.write("</p>\n")
+            paragraphs--
+        }
         prevLine = line
     }
-    htmlFile.write("</p>\n</body>\n</html>")
+    if (paragraphs == 1) htmlFile.write("</p>")
+    htmlFile.write("</body>\n</html>")
     htmlFile.close()
 }
 
