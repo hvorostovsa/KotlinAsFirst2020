@@ -374,9 +374,9 @@ fun markdownToHtmlSimple(inputName: String, outputName: String) {
     val htmlFile = File(outputName).bufferedWriter()
     var stars = 0
     var dashes = 0
-    var paragraphs = 0
+    var paragraphs = 1
     var prevLine = ""
-    htmlFile.write("<html>\n<body>\n")
+    htmlFile.write("<html>\n<body>\n<p>\n")
     for (line in File(inputName).readLines()) {
         if (!line.matches(Regex("\\s*"))) {
             if (paragraphs == 0) {
