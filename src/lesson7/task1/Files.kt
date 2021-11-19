@@ -377,7 +377,7 @@ fun markdownToHtmlSimple(inputName: String, outputName: String) {
     var prevLine = ""
     htmlFile.write("<html>\n<body>\n<p>\n")
     for (line in File(inputName).readLines()) {
-        if (line.isNotEmpty()) {
+        if (!line.matches(Regex("\\s*"))) {
             val list = line.split("") + ""
             for (i in 1 until list.size - 1) {
                 val symbol = list[i]
@@ -436,7 +436,7 @@ fun markdownToHtmlSimple(inputName: String, outputName: String) {
                     }
                 }
             }
-        } else if (line.isEmpty() && prevLine.isNotEmpty())
+        } else if (line.matches(Regex("\\s*")) && !prevLine.matches(Regex("\\s*")))
             htmlFile.write("</p>\n<p>\n")
         prevLine = line
     }
