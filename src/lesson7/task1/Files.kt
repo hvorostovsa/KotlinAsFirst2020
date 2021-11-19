@@ -2,7 +2,6 @@
 
 package lesson7.task1
 
-import ru.spbstu.wheels.out
 import java.io.File
 
 // Урок 7: работа с файлами
@@ -358,7 +357,7 @@ Suspendisse ~~et elit in enim tempus iaculis~~.
  *
  * Соответствующий выходной файл:
 <html>
-<body>
+<body>+-
 <p>
 Lorem ipsum <i>dolor sit amet</i>, consectetur <b>adipiscing</b> elit.
 Vestibulum lobortis. <s>Est vehicula rutrum <i>suscipit</i></s>, ipsum <s>lib</s>ero <i>placerat <b>tortor</b></i>.
@@ -372,7 +371,74 @@ Suspendisse <s>et elit in enim tempus iaculis</s>.
  * (Отступы и переносы строк в примере добавлены для наглядности, при решении задачи их реализовывать не обязательно)
  */
 fun markdownToHtmlSimple(inputName: String, outputName: String) {
-    TODO()
+    val htmlFile = File(outputName).bufferedWriter()
+    var stars = 0
+    var dashes = 0
+    htmlFile.write("<html>\n<body>\n<p>\n")
+    for (line in File(inputName).readLines()) {
+        if (line.isNotEmpty()) {
+            val list = line.split("") + ""
+            for (i in 1 until list.size - 1) {
+                val symbol = list[i]
+                val last = list[i - 1]
+                val next = list[i + 1]
+                if (symbol != "*" && symbol != "~") htmlFile.write(symbol)
+                else {
+                    when {
+                        // для зачеркнутого
+                        symbol == "~" && next == "~" && dashes == 0
+                        -> {
+                            htmlFile.write("<s>")
+                            dashes++
+                        }
+                        symbol == "~" && next == "~" && dashes == 1
+                        -> {
+                            htmlFile.write("</s>")
+                            dashes--
+                        }
+
+                        // для курсива
+                        symbol == "*" && next != "*" && last != "*" && (stars == 0 || stars == 2)
+                        -> {
+                            htmlFile.write("<i>")
+                            stars++
+                        }
+                        symbol == "*" && next != "*" && last != "*" && (stars == 1 || stars == 3)
+                        -> {
+                            htmlFile.write("</i>")
+                            stars--
+                        }
+
+                        // для полужирного
+                        symbol == "*" && next == "*" && last != "*" && list[i + 2] != "*" && (stars == 0 || stars == 1)
+                        -> {
+                            htmlFile.write("<b>")
+                            stars += 2
+                        }
+                        symbol == "*" && next == "*" && last != "*" && list[i + 2] != "*" && (stars == 2 || stars == 3)
+                        -> {
+                            htmlFile.write("</b>")
+                            stars -= 2
+                        }
+
+                        //для полужирного и курсива
+                        symbol == "*" && next == "*" && last == "*" && stars == 0
+                        -> {
+                            htmlFile.write("<b><i>")
+                            stars += 3
+                        }
+                        symbol == "*" && next == "*" && last == "*" && stars == 3
+                        -> {
+                            htmlFile.write("</b></i>")
+                            stars -= 3
+                        }
+                    }
+                }
+            }
+        } else htmlFile.write("</p>\n<p>\n")
+    }
+    htmlFile.write("</p>\n</body>\n</html>")
+    htmlFile.close()
 }
 
 /**
