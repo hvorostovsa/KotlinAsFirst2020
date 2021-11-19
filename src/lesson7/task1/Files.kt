@@ -374,6 +374,7 @@ fun markdownToHtmlSimple(inputName: String, outputName: String) {
     val htmlFile = File(outputName).bufferedWriter()
     var stars = 0
     var dashes = 0
+    var prevLine = " "
     htmlFile.write("<html>\n<body>\n<p>\n")
     for (line in File(inputName).readLines()) {
         if (line.isNotEmpty()) {
@@ -435,7 +436,9 @@ fun markdownToHtmlSimple(inputName: String, outputName: String) {
                     }
                 }
             }
-        } else htmlFile.write("</p>\n<p>\n")
+        } else if (line.isEmpty() && prevLine.isNotEmpty())
+            htmlFile.write("</p>\n<p>\n")
+        prevLine = line
     }
     htmlFile.write("</p>\n</body>\n</html>")
     htmlFile.close()
