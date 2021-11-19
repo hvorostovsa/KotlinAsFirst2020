@@ -159,7 +159,7 @@ fun centerFile(inputName: String, outputName: String) {
     val lengths = mutableListOf<Int>()
     for (line in File(inputName).readLines())
         lengths += line.trim().length
-    val max = lengths.maxOrNull()!!
+    val max = lengths.maxOrNull() ?: return newFile.close()
     for ((i, line) in File(inputName).readLines().withIndex()) {
         newFile.write(" ".repeat((max - lengths[i]) / 2))
         newFile.write(line.trim())
@@ -214,7 +214,7 @@ fun alignFileByWidth(inputName: String, outputName: String) {
         }
     }
 
-    val max = lengths.maxOrNull()!!
+    val max = lengths.maxOrNull() ?: return newFile.close()
     for ((i, line) in File(inputName).readLines().withIndex()) {
         if (!line.matches(Regex("""\s*"""))) {
             var modCount = 0
