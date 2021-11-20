@@ -615,7 +615,8 @@ fun printMultiplicationProcess(lhv: Int, rhv: Int, outputName: String) {
  * Используемые пробелы, отступы и дефисы должны в точности соответствовать примеру.
  *
  */
-// оно не работает, можно не проверять, пытаюсь что-то придумать
+// я знаю, что оно не работает, я не знаю, что с этим делать
+
 fun printDivisionProcess(lhv: Int, rhv: Int, outputName: String) {
     val list = lhv.toString().split("")
     val division = File(outputName).bufferedWriter()
@@ -639,19 +640,16 @@ fun printDivisionProcess(lhv: Int, rhv: Int, outputName: String) {
                 divResult + "\n" + "-".repeat(length + 1) + "\n" + " ".repeat(spaceCount - 1 + n) +
                 newNumber + "\n"
     )
+
     val newList = list.subList(a.toString().length + 2, list.size).toMutableList()
     for (i in 1 until divResult.length) {
         b = newList[i - 1].toIntOrNull() ?: 0
         subtrahend = rhv * (divResult[i].code - 48)
         val lengthInCycle = subtrahend.toString().length
-
         n = (lengthInCycle + 1) - newNumber.length
-
         remainder = newNumber.toInt() - subtrahend
-
         val m =
             newNumber.length - remainder.toString().length // разница между длинами числа из которого вычитают и остатка от вычитания
-
         newNumber = if (i + 1 == divResult.length) "$remainder"
         else "$remainder$b"
         division.write(
