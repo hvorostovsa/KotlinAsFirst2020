@@ -617,6 +617,7 @@ fun printMultiplicationProcess(lhv: Int, rhv: Int, outputName: String) {
  */
 // оно не работает, можно не проверять, пытаюсь что-то придумать
 fun printDivisionProcess(lhv: Int, rhv: Int, outputName: String) {
+    val list = lhv.toString().split("")
     val division = File(outputName).bufferedWriter()
     val divResult = (lhv / rhv).toString()
     var a = lhv
@@ -638,17 +639,11 @@ fun printDivisionProcess(lhv: Int, rhv: Int, outputName: String) {
                 divResult + "\n" + "-".repeat(length + 1) + "\n" + " ".repeat(spaceCount - 1 + n) +
                 newNumber + "\n"
     )
-
-
+    val newList = list.subList(a.toString().length + 2, list.size).toMutableList()
     for (i in 1 until divResult.length) {
-        a = lhv
-        b = a % 10
+        b = newList[i - 1].toIntOrNull() ?: 0
         subtrahend = rhv * (divResult[i].code - 48)
         val lengthInCycle = subtrahend.toString().length
-        while (newNumber.toInt() - subtrahend >= rhv) {
-            b = a % 10
-            a /= 10
-        }
 
         n = (lengthInCycle + 1) - newNumber.length
 
