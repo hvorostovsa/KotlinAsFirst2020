@@ -616,6 +616,54 @@ fun printMultiplicationProcess(lhv: Int, rhv: Int, outputName: String) {
  *
  */
 fun printDivisionProcess(lhv: Int, rhv: Int, outputName: String) {
-    TODO()
+    val division = File(outputName).bufferedWriter()
+    val divResult = (lhv / rhv).toString()
+    division.write(" $lhv | $rhv\n")
+    var a = lhv
+    var b = 0 // цифра, которую сносят для следующего вычитания
+    var subtrahend = rhv * (divResult[0].code - 48) // число, которое вычитают
+    while (a - subtrahend > rhv) {
+        b = a % 10
+        a /= 10
+    }
+    var remainder = a - subtrahend // остаток от вычитания
+    var newNumber = if (divResult.length == 1) "$remainder"
+    else "$remainder$b"
+    val length = subtrahend.toString().length
+    var spaceCount = length
+    division.write(
+        "-$subtrahend" + " ".repeat(lhv.toString().length - length + 3) +
+                divResult + "\n" + "-".repeat(length + 1) + "\n" + " ".repeat(spaceCount) +
+                newNumber + "\n"
+    )
+
+    for (i in 1 until divResult.length) {
+        a = lhv
+        b = a % 10
+        subtrahend = rhv * (divResult[i].code - 48)
+        val lengthInCycle = subtrahend.toString().length
+        while (newNumber.toInt() - subtrahend >= rhv) {
+            b = a % 10
+            a /= 10
+        }
+
+        val n =
+            (lengthInCycle + 1) - newNumber.length // разница между длинами вычитаемого числа и числа из которого вычитают
+
+        remainder = newNumber.toInt() - subtrahend
+
+        val m =
+            newNumber.length - remainder.toString().length // разница между длинами числа из которого вычитают и остатка от вычитания
+
+        newNumber = if (i + 1 == divResult.length) "$remainder"
+        else "$remainder$b"
+        division.write(
+            " ".repeat(spaceCount - n) + "-$subtrahend" + "\n" +
+                    " ".repeat(spaceCount - n) + "-".repeat(lengthInCycle + 1) + "\n" +
+                    " ".repeat(spaceCount + m) + newNumber + "\n"
+        )
+        spaceCount += m
+    }
+    division.close()
 }
 
