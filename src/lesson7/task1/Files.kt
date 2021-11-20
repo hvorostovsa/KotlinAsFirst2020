@@ -601,27 +601,28 @@ fun printMultiplicationProcess(lhv: Int, rhv: Int, outputName: String) {
  * Вывести в выходной файл процесс деления столбиком числа lhv (> 0) на число rhv (> 0).
  *
  * Пример (для lhv == 19935, rhv == 22):
-19935 | 22
+ 19935 | 22
 -198     906
 ----
-13
--0
---
-135
--132
-----
-3
+   13
+   -0
+   --
+   135
+  -132
+  ----
+     3
 
  * Используемые пробелы, отступы и дефисы должны в точности соответствовать примеру.
  *
  */
+// оно не работает, можно не проверять, пытаюсь что-то придумать
 fun printDivisionProcess(lhv: Int, rhv: Int, outputName: String) {
     val division = File(outputName).bufferedWriter()
     val divResult = (lhv / rhv).toString()
-    division.write(" $lhv | $rhv\n")
     var a = lhv
     var b = 0 // цифра, которую сносят для следующего вычитания
     var subtrahend = rhv * (divResult[0].code - 48) // число, которое вычитают
+    val length = subtrahend.toString().length
     while (a - subtrahend > rhv) {
         b = a % 10
         a /= 10
@@ -629,13 +630,15 @@ fun printDivisionProcess(lhv: Int, rhv: Int, outputName: String) {
     var remainder = a - subtrahend // остаток от вычитания
     var newNumber = if (divResult.length == 1) "$remainder"
     else "$remainder$b"
-    val length = subtrahend.toString().length
+    var n = (length + 1) - a.toString().length // разница между длинами вычитаемого числа и числа из которого вычитают
+    division.write(" ".repeat(n) + "$lhv | $rhv\n")
     var spaceCount = length
     division.write(
-        "-$subtrahend" + " ".repeat(lhv.toString().length - length + 3) +
-                divResult + "\n" + "-".repeat(length + 1) + "\n" + " ".repeat(spaceCount) +
+        "-$subtrahend" + " ".repeat((lhv.toString().length + n) - (length + 1) + 3) +
+                divResult + "\n" + "-".repeat(length + 1) + "\n" + " ".repeat(spaceCount - 1 + n) +
                 newNumber + "\n"
     )
+
 
     for (i in 1 until divResult.length) {
         a = lhv
@@ -647,8 +650,7 @@ fun printDivisionProcess(lhv: Int, rhv: Int, outputName: String) {
             a /= 10
         }
 
-        val n =
-            (lengthInCycle + 1) - newNumber.length // разница между длинами вычитаемого числа и числа из которого вычитают
+        n = (lengthInCycle + 1) - newNumber.length
 
         remainder = newNumber.toInt() - subtrahend
 
