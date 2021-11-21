@@ -618,46 +618,64 @@ fun printMultiplicationProcess(lhv: Int, rhv: Int, outputName: String) {
 // я знаю, что оно не работает, я не знаю, что с этим делать
 
 fun printDivisionProcess(lhv: Int, rhv: Int, outputName: String) {
-    val list = lhv.toString().split("")
+    val list = lhv.toString().split("").filter { it != "" }
     val division = File(outputName).bufferedWriter()
     val divResult = (lhv / rhv).toString()
-    var a = lhv
-    var b = 0 // цифра, которую сносят для следующего вычитания
-    var subtrahend = rhv * (divResult[0].code - 48) // число, которое вычитают
-    val length = subtrahend.toString().length
-    while (a - subtrahend > rhv) {
-        b = a % 10
-        a /= 10
+    // переменные для вычислений
+    var difference = rhv * (divResult[0].code - 48) // число, которое вычитают (пока для первого вычисления)
+    var length = difference.toString().length
+
+    var first = "" // часть исходного числа, из которой вычитают
+    var count = 0 // количество цифр в first
+    if (difference == 0) {
+        first = "$lhv"
+        count = first.length
+    } else {
+        while ((first.toIntOrNull() ?: 0) - difference < 0) {
+            first += list[count]
+            count++
+        }
     }
-    var remainder = a - subtrahend // остаток от вычитания
-    var newNumber = if (divResult.length == 1) "$remainder"
-    else "$remainder$b"
-    var n = (length + 1) - a.toString().length // разница между длинами вычитаемого числа и числа из которого вычитают
-    division.write(" ".repeat(n) + "$lhv | $rhv\n")
-    var spaceCount = length
+
+    val numbers = list.subList(count, list.size) + "" // оставшиеся цифры числа
+    var number = numbers[0] // число, которое сносим для вычисления
+
+    var remainder = first.toInt() - difference // остаток от вычитания
+    var spaceCount = count - remainder.toString().length
+    var newNumber = "$remainder$number"
+    var n = 0
+
+    // запись в файл
+    if (length != count) division.write("$lhv | $rhv\n") // отступ нужен только если длины чисел равны (минус сдвигает)
+    else {
+        n = 1
+        division.write(" $lhv | $rhv\n")
+    }
+    spaceCount += n
     division.write(
-        "-$subtrahend" + " ".repeat((lhv.toString().length + n) - (length + 1) + 3) +
-                divResult + "\n" + "-".repeat(length + 1) + "\n" + " ".repeat(spaceCount - 1 + n) +
-                newNumber + "\n"
+        "-$difference" + " ".repeat((lhv.toString().length - (length + 1)) + n + 3) + "$divResult\n" +
+                "-".repeat(length + 1) + "\n" + " ".repeat(spaceCount) + "$newNumber\n"
     )
 
-    val newList = list.subList(a.toString().length + 2, list.size).toMutableList()
+    // в первом шаге нужно было вывести результат, теперь все остальные шаги
     for (i in 1 until divResult.length) {
-        b = newList[i - 1].toIntOrNull() ?: 0
-        subtrahend = rhv * (divResult[i].code - 48)
-        val lengthInCycle = subtrahend.toString().length
-        n = (lengthInCycle + 1) - newNumber.length
-        remainder = newNumber.toInt() - subtrahend
-        val m =
-            newNumber.length - remainder.toString().length // разница между длинами числа из которого вычитают и остатка от вычитания
-        newNumber = if (i + 1 == divResult.length) "$remainder"
-        else "$remainder$b"
+        difference = rhv * (divResult[i].code - 48)
+        length = difference.toString().length
+        number = numbers[i]
+        remainder = newNumber.toInt() - difference
+        val spaceDifferent = newNumber.length - remainder.toString().length // разница в отступах для следующего числа
+
+        n = if (length != newNumber.length) 0 // проверка на то, сдвигает ли минус число
+        else 1
+
+        newNumber = "$remainder$number"
+
         division.write(
-            " ".repeat(spaceCount - n) + "-$subtrahend" + "\n" +
-                    " ".repeat(spaceCount - n) + "-".repeat(lengthInCycle + 1) + "\n" +
-                    " ".repeat(spaceCount + m) + newNumber + "\n"
+            " ".repeat(spaceCount - n) + "-$difference\n" +
+                    " ".repeat(spaceCount - n) + "-".repeat(length + 1) + "\n" +
+                    " ".repeat(spaceCount + spaceDifferent) + "$newNumber\n"
         )
-        spaceCount += m
+        spaceCount += spaceDifferent
     }
     division.close()
 }
