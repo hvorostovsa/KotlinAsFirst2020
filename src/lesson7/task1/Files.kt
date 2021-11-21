@@ -643,18 +643,21 @@ fun printDivisionProcess(lhv: Int, rhv: Int, outputName: String) {
     var remainder = first.toInt() - difference // остаток от вычитания
     var spaceCount = count - remainder.toString().length
     var newNumber = "$remainder$number"
-    var n = 0
+    var n = 0 // отступ в начале файла
+    var m = 0 // разница в длине first и difference (в стандартном случае 0)
 
     // запись в файл
-    if (length != count) division.write("$lhv | $rhv\n") // отступ нужен только если длины чисел равны (минус сдвигает)
-    else {
+    if (length != count) {
+        m = count - (length + 1)
+        division.write("$lhv | $rhv\n")
+    } else {
         n = 1
         division.write(" $lhv | $rhv\n")
     }
     spaceCount += n
-    division.write(
-        "-$difference" + " ".repeat((lhv.toString().length - (length + 1)) + n + 3) + "$divResult\n" +
-                "-".repeat(length + 1) + "\n" + " ".repeat(spaceCount) + "$newNumber\n"
+    division.write(    // n мы добавляем, если есть отступ. m мы прибавляем если разница в длине строк, чтобы выравнять вычитаемое число по краю
+        " ".repeat(m) + "-$difference" + " ".repeat((lhv.toString().length - (length + 1 + m)) + n + 3) + "$divResult\n" +
+                "-".repeat(length + 1 + m) + "\n" + " ".repeat(spaceCount) + "$newNumber\n"
     )
 
     // в первом шаге нужно было вывести результат, теперь все остальные шаги
@@ -664,15 +667,18 @@ fun printDivisionProcess(lhv: Int, rhv: Int, outputName: String) {
         number = numbers[i]
         remainder = newNumber.toInt() - difference
         val spaceDifferent = newNumber.length - remainder.toString().length // разница в отступах для следующего числа
+        m = 0
 
-        n = if (length != newNumber.length) 0 // проверка на то, сдвигает ли минус число
-        else 1
+        if (length != newNumber.length) {
+            n = 0
+            m = newNumber.length - (length + 1)
+        } else n = 1
 
         newNumber = "$remainder$number"
 
-        division.write(
-            " ".repeat(spaceCount - n) + "-$difference\n" +
-                    " ".repeat(spaceCount - n) + "-".repeat(length + 1) + "\n" +
+        division.write( // m работает аналогично с первым шагом. n вычитаем, если нужно освободить место для плюса
+            " ".repeat(spaceCount - n + m) + "-$difference\n" +
+                    " ".repeat(spaceCount - n) + "-".repeat(length + 1 + m) + "\n" +
                     " ".repeat(spaceCount + spaceDifferent) + "$newNumber\n"
         )
         spaceCount += spaceDifferent
