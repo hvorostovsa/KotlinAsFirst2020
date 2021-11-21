@@ -615,8 +615,6 @@ fun printMultiplicationProcess(lhv: Int, rhv: Int, outputName: String) {
  * Используемые пробелы, отступы и дефисы должны в точности соответствовать примеру.
  *
  */
-// я знаю, что оно не работает, я не знаю, что с этим делать
-
 fun printDivisionProcess(lhv: Int, rhv: Int, outputName: String) {
     val list = lhv.toString().split("").filter { it != "" }
     val division = File(outputName).bufferedWriter()
