@@ -209,12 +209,10 @@ fun mostExpensive(description: String): String {
     if (!description.matches(Regex("""(.+\s\d+(\.\d+)?;\s)*.+\s\d+(\.\d+)?""")))
         return ""
     val map = mutableMapOf(0.0 to "")
-    val prices = mutableListOf(0.0)
     val list = description.filter { it != ';' }.split(" ")
     for (i in 1 until list.size step 2) {
         val price = list[i].toDouble()
         map[price] = list[i - 1]
-        prices += price
     }
     return map[map.keys.maxOrNull()]!!
 }
