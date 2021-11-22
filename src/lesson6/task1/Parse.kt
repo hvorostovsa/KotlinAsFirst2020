@@ -212,7 +212,7 @@ fun mostExpensive(description: String): String {
     val list = description.filter { it != ';' }.split(" ")
     for (i in 1 until list.size step 2) {
         val price = list[i].toDouble()
-        map[price] = list[i - 1]
+        if (price >= 0.0) map[price] = list[i - 1]
     }
     return map[map.keys.maxOrNull()]!!
 }
