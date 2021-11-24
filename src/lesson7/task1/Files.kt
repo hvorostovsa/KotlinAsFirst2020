@@ -620,7 +620,7 @@ fun printDivisionProcess(lhv: Int, rhv: Int, outputName: String) {
     val division = File(outputName).bufferedWriter()
     val divResult = (lhv / rhv).toString()
     // переменные для вычислений
-    var difference = rhv * (divResult[0].code - '0'.code) // число, которое вычитают (пока для первого вычисления)
+    var difference = rhv * (divResult[0] - '0') // число, которое вычитают (пока для первого вычисления)
     var length = difference.toString().length
 
     var first = "" // часть исходного числа, из которой вычитают
@@ -660,7 +660,7 @@ fun printDivisionProcess(lhv: Int, rhv: Int, outputName: String) {
 
     // в первом шаге нужно было вывести результат, теперь все остальные шаги
     for (i in 1 until divResult.length) {
-        difference = rhv * (divResult[i].code - '0'.code)
+        difference = rhv * (divResult[i] - '0')
         length = difference.toString().length
         number = numbers[i]
         remainder = newNumber.toInt() - difference
