@@ -25,8 +25,9 @@ class UnsignedBigInteger : Comparable<UnsignedBigInteger> {
      * Конструктор из строки
      */
     constructor(s: String) {
-        list = MutableList(s.length) {
-            val digit = s[s.length - it - 1]
+        val newS = s.trimStart { it == '0' }
+        list = MutableList(newS.length) {
+            val digit = newS[newS.length - it - 1]
             if (digit.isDigit()) digit.digitToInt()
             else throw incorrectNumberException
         }
@@ -150,6 +151,7 @@ class UnsignedBigInteger : Comparable<UnsignedBigInteger> {
     }
 
     fun divmod(other: UnsignedBigInteger): Pair<UnsignedBigInteger, UnsignedBigInteger> {
+        if (other.list.size == 0) throw ArithmeticException("Zero division error")
         if (this < other) return Pair(UnsignedBigInteger(0), UnsignedBigInteger(this.list))
         var first = UnsignedBigInteger(this.list)
         val second = other.list
@@ -207,7 +209,8 @@ class UnsignedBigInteger : Comparable<UnsignedBigInteger> {
     /**
      * Преобразование в строку
      */
-    override fun toString(): String = list.reversed().joinToString("")
+    override fun toString(): String =
+        if (list.isNotEmpty()) list.reversed().joinToString("") else "0"
 
     /**
      * Преобразование в целое
