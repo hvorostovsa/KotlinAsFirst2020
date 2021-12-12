@@ -25,28 +25,51 @@ class OpenHashSet<T>(val capacity: Int) {
     /**
      * Число элементов в хеш-таблице
      */
-    val size: Int get() = TODO()
+    val size: Int
+        get() {
+            if (capacity == 0) return 0
+            val result = elements.indexOfFirst { it == null }
+            if (result == -1) return capacity
+            return result
+        }
 
     /**
      * Признак пустоты
      */
-    fun isEmpty(): Boolean = TODO()
+    fun isEmpty(): Boolean = capacity == 0 || elements[0] == null
 
     /**
      * Добавление элемента.
      * Вернуть true, если элемент был успешно добавлен,
      * или false, если такой элемент уже был в таблице, или превышена вместимость таблицы.
      */
-    fun add(element: T): Boolean = TODO()
+    fun add(element: T): Boolean {
+        if (element in this) return false
+        if (this.size == capacity) return false
+        elements[this.size] = element
+        return true
+    }
 
     /**
      * Проверка, входит ли заданный элемент в хеш-таблицу
      */
-    operator fun contains(element: T): Boolean = TODO()
+    operator fun contains(element: T): Boolean {
+        for (i in 0 until this.size) if (elements[i] == element) return true
+        return false
+    }
 
     /**
      * Таблицы равны, если в них одинаковое количество элементов,
      * и любой элемент из второй таблицы входит также и в первую
      */
-    override fun equals(other: Any?): Boolean = TODO()
+    override fun equals(other: Any?): Boolean {
+        if (other !is OpenHashSet<*>) return false
+        if (size != other.size) return false
+        for (i in 0 until size) {
+            if (elements[i] != other.elements[i]) return false
+        }
+        return true
+    }
+
+    override fun hashCode(): Int = List(size) { elements[it] }.hashCode()
 }
