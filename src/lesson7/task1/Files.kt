@@ -399,11 +399,11 @@ fun markdownToHtmlSimple(inputName: String, outputName: String) {
     var isStrikethrough = false
     File(outputName).bufferedWriter().use { writer ->
         writer.write("<html><body>")
-        File(inputName).readText().trim().split(Regex("\r?\n\\s*\r?\n")).forEach { paragraph ->
+        File(inputName).readText().trim().split(Regex("\r?\n+\\s*\r?\n+")).forEach { paragraph ->
             val triple = markdownParagraph(paragraph, stack, isStrikethrough)
             stack = triple.second
             isStrikethrough = triple.third
-            if (triple.first.isNotBlank()) writer.write("<p>${triple.first}</p>")
+            writer.write("<p>${triple.first}</p>")
         }
         writer.write("</body></html>")
     }
