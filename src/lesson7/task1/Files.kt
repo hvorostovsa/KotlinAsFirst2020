@@ -403,7 +403,7 @@ fun markdownToHtmlSimple(inputName: String, outputName: String) {
             val triple = markdownParagraph(paragraph, stack, isStrikethrough)
             stack = triple.second
             isStrikethrough = triple.third
-            writer.write("<p>${triple.first}</p>")
+            if (triple.first.isNotBlank()) writer.write("<p>${triple.first}</p>")
         }
         writer.write("</body></html>")
     }
