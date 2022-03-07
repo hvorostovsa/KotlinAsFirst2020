@@ -2,7 +2,9 @@
 
 package lesson11.task1
 
+import kotlin.math.abs
 import kotlin.math.max
+import kotlin.math.pow
 
 /**
  * Класс "беззнаковое большое целое число".
@@ -16,20 +18,29 @@ import kotlin.math.max
  * сравнение на равенство и неравенство
  */
 class UnsignedBigInteger : Comparable<UnsignedBigInteger> {
-
     private val incorrectNumberException = IllegalArgumentException("Incorrect number")
+    private val blockSize = 9
+    private val blockDelimiter = 10.0.pow(blockSize).toInt()
 
-    private val list: MutableList<Int>
+    val list: MutableList<Int> // need private
+
+    // 1122334455667788 => [455667788, 1122334]
 
     /**
      * Конструктор из строки
      */
     constructor(s: String) {
         val newS = s.trimStart { it == '0' }
-        list = MutableList(newS.length) {
-            val digit = newS[newS.length - it - 1]
-            if (digit.isDigit()) digit.digitToInt()
-            else throw incorrectNumberException
+        list = mutableListOf()
+        if (newS.isEmpty()) {
+            list.add(0)
+        } else {
+            val listSize = newS.length / blockSize + if (newS.length % blockSize > 0) 1 else 0
+            for (i in 0 until listSize) {
+                val end = newS.length - i * blockSize // not inclusive
+                val start = max(0, end - blockSize)
+                list.add(newS.substring(start, end).toInt())
+            }
         }
     }
 
@@ -38,11 +49,15 @@ class UnsignedBigInteger : Comparable<UnsignedBigInteger> {
      */
     constructor(i: Int) {
         if (i < 0) throw incorrectNumberException
-        list = mutableListOf()
-        var numberNow = i
-        while (numberNow > 0) {
-            list.add(numberNow % 10)
-            numberNow /= 10
+        if (i == 0) {
+            list = mutableListOf(0)
+        } else {
+            list = mutableListOf()
+            var number = i
+            while (number > 0) {
+                list.add(number % blockDelimiter)
+                number /= blockDelimiter
+            }
         }
     }
 
@@ -51,64 +66,93 @@ class UnsignedBigInteger : Comparable<UnsignedBigInteger> {
         this.list = list.toMutableList()
     }
 
+    val length get() = getDigitLength(list)
+
+    private fun getDigitLength(list: MutableList<Int>): Int {
+        // Get number of significant digits
+        var result = 0
+        for (i in 0 until list.size - 1) {
+            result += blockSize
+        }
+        result += getNumberLength(list[list.size - 1])
+        return result
+    }
+
+    private fun getDigit(list: MutableList<Int>, index: Int): Int {
+        // get digit from list by its index
+        val i = index / blockSize // number index
+        val j = index % blockSize // digit index
+        if ((i >= list.size) ||
+            (i == list.size - 1 && j >= getNumberLength(list[i]))
+        ) throw IndexOutOfBoundsException()
+        val number = list[i]
+        return number / 10.0.pow(j).toInt() % 10
+    }
+
+    private fun getDigit(index: Int): Int = getDigit(list, index)
+
     /**
      * Сложение
      */
+
+    private fun plusIndex(
+        otherBigInteger: UnsignedBigInteger,
+        list: MutableList<Int>,
+        index: Int
+    ) {
+        val digit = list[index] +  // Переполнения быть не может. (999 999 999 + 999 999 999 + 1) < Integer.MAX_VALUE
+                this.list.getOrElse(index) { 0 } +
+                otherBigInteger.list.getOrElse(index) { 0 }
+        list[index] = digit % blockDelimiter
+        val higherDigit = digit / blockDelimiter // Разряд выше
+        if (index < list.size - 1) list[index + 1] = higherDigit
+        else if (higherDigit > 0) list.add(higherDigit)
+    }
+
     operator fun plus(other: UnsignedBigInteger): UnsignedBigInteger {
         val length = max(this.list.size, other.list.size)
         val newList = MutableList(length) { 0 }
-        for (i in 0 until length - 1) {
-            val digit = newList[i] +
-                    this.list.getOrElse(i) { 0 } +
-                    other.list.getOrElse(i) { 0 }
-            newList[i] = digit % 10
-            newList[i + 1] = digit / 10
+        for (i in 0 until length) {
+            plusIndex(other, newList, i)
         }
-        val digit = newList[length - 1] +
-                this.list.getOrElse(length - 1) { 0 } +
-                other.list.getOrElse(length - 1) { 0 }
-        newList[length - 1] = digit % 10
-        if (digit / 10 > 0) newList.add(digit / 10)
         return UnsignedBigInteger(newList)
     }
 
     /**
      * Вычитание (бросить ArithmeticException, если this < other)
      */
+
+    private fun minusIndex(
+        otherBigInteger: UnsignedBigInteger,
+        list: MutableList<Int>,
+        index: Int
+    ) {
+        list[index] -= otherBigInteger.list[index]
+        if (list[index] < 0) {
+            if (index == list.size - 1) throw ArithmeticException()
+            list[index] += blockDelimiter
+            list[index + 1] -= 1
+        }
+    }
+
     operator fun minus(other: UnsignedBigInteger): UnsignedBigInteger {
         val arithmeticException = ArithmeticException()
         if (other.list.size > this.list.size) throw arithmeticException
         val newList = this.list.toMutableList()
 
-        if (newList.size > other.list.size) {
-            for (i in 0 until other.list.size) {
-                newList[i] -= other.list[i]
-                if (newList[i] < 0) {
-                    newList[i] += 10
-                    newList[i + 1] -= 1
-                }
-            }
-        } else {
-            for (i in 0 until other.list.size - 1) {
-                newList[i] -= other.list[i]
-                if (newList[i] < 0) {
-                    newList[i] += 10
-                    newList[i + 1] -= 1
-                }
-            }
-            val size = newList.size
-            newList[size - 1] -= other.list[size - 1]
-            if (newList[size - 1] < 0) throw arithmeticException
+        for (i in 0 until other.list.size) {
+            minusIndex(other, newList, i)
         }
-        return UnsignedBigInteger(newList.subList(0, newList.indexOfLast { it != 0 } + 1))
+        val resultList = newList.subList(0, newList.indexOfLast { it != 0 } + 1)
+        return UnsignedBigInteger(if (resultList.isEmpty()) mutableListOf(0) else resultList)
     }
 
     /**
      * Умножение
      */
     operator fun times(other: UnsignedBigInteger): UnsignedBigInteger {
-        val first: MutableList<Int>
-        val second: MutableList<Int>
+        val first: MutableList<Int> // biggest by List.size
+        val second: MutableList<Int>  // lowest by List.size
         if (this > other) {
             first = this.list
             second = other.list
@@ -119,8 +163,9 @@ class UnsignedBigInteger : Comparable<UnsignedBigInteger> {
         if (second.isEmpty()) return UnsignedBigInteger(0)
 
         var result = UnsignedBigInteger(0)
-        for (i in 0 until second.size) {
-            if (second[i] != 0) result += UnsignedBigInteger(shiftList(timesList(first, second[i]), i))
+        for (i in 0 until getDigitLength(second)) {
+            val mulList = timesList(first, getDigit(second, i))
+            if (getDigit(second, i) != 0) result += UnsignedBigInteger(shiftList(mulList, i))
         }
         return result
     }
@@ -129,52 +174,99 @@ class UnsignedBigInteger : Comparable<UnsignedBigInteger> {
         if (digit == 0) return mutableListOf()
         val newList = list.toMutableList()
         if (digit == 1) return newList
-        for (i in 0 until newList.size) newList[i] *= digit
-        for (i in 0 until newList.size - 1) {
-            newList[i + 1] += newList[i] / 10
-            newList[i] %= 10
+
+        val lowerBlockSize = blockSize - 1 // 8
+        val lowerBlockDelimiter = 10.0.pow(lowerBlockSize).toInt() // 100 000 000
+
+        var currentIndexResult: Int
+        var nextIndexResult = 0
+
+        for (i in 0 until newList.size) {
+            if (getNumberLength(newList[i]) < blockSize) { // adaptation
+                val result = newList[i] * digit + nextIndexResult
+                currentIndexResult = result % blockDelimiter
+                nextIndexResult = result / blockDelimiter
+            } else {
+                val firstDigit = newList[i] / lowerBlockDelimiter // 123 456 789 => 1
+                val otherDigits = newList[i] % lowerBlockDelimiter // 123 456 789 => 23 456 789
+
+                val otherDigitsMul = otherDigits * digit
+                val firstDigitMul = firstDigit * digit + nextIndexResult
+
+                currentIndexResult =
+                    (firstDigitMul % 10 + otherDigitsMul / lowerBlockDelimiter) % 10 * lowerBlockDelimiter +
+                            otherDigitsMul % lowerBlockDelimiter
+                nextIndexResult = (firstDigitMul + otherDigitsMul / lowerBlockDelimiter) / 10
+            }
+            newList[i] = currentIndexResult
         }
-        val size = newList.size
-        var number = newList[size - 1] / 10
-        newList[size - 1] %= 10
-        while (number > 0) {
-            newList.add(number % 10)
-            number /= 10
-        }
+
+        if (nextIndexResult > 0) newList.add(nextIndexResult)
         return newList
     }
 
-    // change existing list
+    private fun getNumberLength(number: Int): Int {
+        if (number == 0) return 0
+        var n = abs(number)
+        var length = 0
+        while (n > 0) {
+            length++
+            n /= 10
+        }
+        return length
+    }
+
     private fun shiftList(list: MutableList<Int>, shiftNumber: Int): MutableList<Int> {
-        list.addAll(0, List(shiftNumber) { 0 })
+        // change existing list, multiplies list by 10^shiftNumber
+        val blocksToAdd = shiftNumber / blockSize
+        val zerosToAdd = shiftNumber % blockSize
+        val delimiter = 10.0.pow(blockSize - zerosToAdd).toInt()
+        val multiplier = 10.0.pow(zerosToAdd).toInt()
+        if (zerosToAdd > 0) {
+            val size = list.size // remember current size
+            if (getNumberLength(list[size - 1]) + zerosToAdd > blockSize) list.add(0)
+
+            var toCurrentIndex: Int
+            var toNextIndex: Int
+            for (i in size - 1 downTo 0) {
+                if (list[i] == 0) continue
+                toCurrentIndex = list[i] % delimiter * multiplier
+                toNextIndex = list[i] / delimiter
+                list[i] = toCurrentIndex
+                if (toNextIndex > 0) list[i + 1] += toNextIndex
+            }
+        }
+        list.addAll(0, List(blocksToAdd) { 0 })
         return list
     }
 
     fun divmod(other: UnsignedBigInteger): Pair<UnsignedBigInteger, UnsignedBigInteger> {
-        if (other.list.size == 0) throw ArithmeticException("Zero division error")
+        if (other.list.isEmpty() || other.list == mutableListOf(0)) throw ArithmeticException("Zero division error")
         if (this < other) return Pair(UnsignedBigInteger(0), UnsignedBigInteger(this.list))
         var first = UnsignedBigInteger(this.list)
         val second = other.list
-        val size = second.size
-        var result = mutableListOf<Int>()
+        val result = StringBuilder()
 
         while (first >= other) {
-            var k = first.list.size - size
-            var n = UnsignedBigInteger(shiftList(second.toMutableList(), k))
-            while (n > first && k > 0) {
-                k -= 1
-                n = UnsignedBigInteger(shiftList(second.toMutableList(), k))
+            var shiftSize = first.length - getDigitLength(second)
+            var n = UnsignedBigInteger(shiftList(second.toMutableList(), shiftSize))
+
+            // здесь мы обрабатываем случай 12345 / 99000
+            // 12345 / 99000 => 12345 / 9900
+            while (n > first && shiftSize > 0) {
+                shiftSize -= 1
+                n = UnsignedBigInteger(shiftList(second.toMutableList(), shiftSize))
             }
-            var digit = 0
+
+            var digit = '0'
             while (first >= n) {
                 digit++
                 first -= n
             }
-            if (result.size == 0) result = MutableList(k + 1) { 0 } // will be worked only during first iteration
-            result[k] = digit
+            result.append(digit)
         }
 
-        return Pair(UnsignedBigInteger(result), first)
+        return Pair(UnsignedBigInteger(result.toString()), first)
     }
 
     /**
@@ -220,5 +312,7 @@ class UnsignedBigInteger : Comparable<UnsignedBigInteger> {
         if (this <= UnsignedBigInteger(Int.MAX_VALUE)) return this.toString().toInt()
         throw ArithmeticException("Number is too large for Int data type")
     }
+
+    override fun hashCode(): Int = list.hashCode()
 
 }
