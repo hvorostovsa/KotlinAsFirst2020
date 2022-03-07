@@ -22,7 +22,7 @@ class UnsignedBigInteger : Comparable<UnsignedBigInteger> {
     private val blockSize = 9
     private val blockDelimiter = 10.0.pow(blockSize).toInt()
 
-    val list: MutableList<Int> // need private
+    private val list: MutableList<Int>
 
     // 1122334455667788 => [455667788, 1122334]
 
